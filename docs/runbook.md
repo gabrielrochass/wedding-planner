@@ -1,6 +1,6 @@
 # Runbook de incidentes
 
-Roteiro curto para incidentes de segurança com dados pessoais. O Contadinho é mantido por um agente de
+Roteiro curto para incidentes de segurança com dados pessoais. O Sim a Dois é mantido por um agente de
 tratamento de pequeno porte (Res. CD/ANPD 2/2022), por isso os prazos abaixo já estão em dobro.
 
 ## 1. Conter
@@ -19,8 +19,8 @@ Anote no registro (passo 4):
 - quais dados e quantos titulares foram afetados;
 - se há risco ou dano relevante para eles.
 
-Os lançamentos são dados financeiros, um dos critérios de risco relevante da Res. CD/ANPD 15/2024. Na dúvida,
-comunique.
+Os dados de convidados (telefone, endereço e restrições alimentares, que podem revelar saúde ou religião) e os
+valores do orçamento contam como risco relevante na Res. CD/ANPD 15/2024. Na dúvida, comunique.
 
 ## 3. Comunicar
 

@@ -3,7 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { settingsNav } from "./nav-items";
+import { moreNav } from "./nav-items";
 
 export function PageHeader({
   title,
@@ -14,7 +14,7 @@ export function PageHeader({
   back?: { href: Route; label: string };
   action?: React.ReactNode;
 }) {
-  const SettingsIcon = settingsNav.icon;
+  const MoreIcon = moreNav.icon;
   return (
     <header className="flex flex-col gap-1 pb-6">
       {back && (
@@ -33,15 +33,14 @@ export function PageHeader({
         {action}
         {!back && !action && (
           <Link
-            href={settingsNav.href}
-            aria-label={settingsNav.label}
-            data-tour="ajustes"
+            href={moreNav.href}
+            aria-label={moreNav.label}
             className={cn(
               buttonVariants({ variant: "ghost", size: "icon-lg" }),
               "md:hidden",
             )}
           >
-            <SettingsIcon aria-hidden="true" className="size-6" />
+            <MoreIcon aria-hidden="true" className="size-6" />
           </Link>
         )}
       </div>

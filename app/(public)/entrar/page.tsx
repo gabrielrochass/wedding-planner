@@ -1,20 +1,19 @@
 import {
-  CalendarCheckIcon,
-  ChartPieIcon,
   CircleCheckIcon,
-  PiggyBankIcon,
-  ZapIcon,
+  ListChecksIcon,
+  MessageCircleIcon,
+  WalletIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { CredentialsForm } from "@/components/auth/credentials-form";
 import { SwitchLink } from "@/components/auth/switch-link";
-import { Tally } from "@/components/brand/tally";
+import { Rings } from "@/components/brand/rings";
 import { devSignInEnabled, safeNext, withNext } from "@/lib/auth-paths";
 import { legal, m } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: m.auth.title };
 
-const pointIcons = [ZapIcon, ChartPieIcon, CalendarCheckIcon];
+const pointIcons = [ListChecksIcon, WalletIcon, MessageCircleIcon];
 
 export default async function SignInPage({
   searchParams,
@@ -25,19 +24,17 @@ export default async function SignInPage({
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-sm flex-col justify-center gap-10 py-12">
       <header className="flex flex-col items-center gap-4 text-center">
-        <span className="flex size-16 items-center justify-center rounded-[1.125rem] bg-primary text-primary-foreground shadow-sm">
-          <PiggyBankIcon
-            aria-hidden="true"
-            className="size-9"
-            strokeWidth={1.75}
-          />
-        </span>
+        <Rings className="h-16 w-24" />
         <div className="flex flex-col items-center gap-1">
-          <h1 className="text-title1 font-bold tracking-tight" translate="no">
+          <h1
+            className="font-display text-large-title font-bold tracking-tight"
+            translate="no"
+          >
             {m.app.name}
           </h1>
-          <Tally />
-          <p className="text-body text-muted-foreground">{m.auth.tagline}</p>
+          <p className="font-display text-title3 text-muted-foreground">
+            {m.auth.tagline}
+          </p>
         </div>
       </header>
 
@@ -45,7 +42,7 @@ export default async function SignInPage({
         <output className="flex items-start gap-2 rounded-xl bg-card px-4 py-3 text-subhead">
           <CircleCheckIcon
             aria-hidden="true"
-            className="mt-0.5 size-5 shrink-0 text-income"
+            className="mt-0.5 size-5 shrink-0 text-success"
           />
           {m.auth.deleted}
         </output>

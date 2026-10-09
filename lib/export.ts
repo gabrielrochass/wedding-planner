@@ -1,203 +1,245 @@
+import { dueDate } from "@/lib/checklist";
 import { toCsv } from "@/lib/csv";
 import { todayInSaoPaulo } from "@/lib/dates";
 import { m } from "@/lib/i18n";
 import { formatPlainAmount } from "@/lib/money";
 import type { Tables } from "@/lib/supabase/database.types";
 
-type Named = { id: string; name: string };
-type Labels = Readonly<Record<string, string>>;
-
 const column = m.exportData.columns;
 
-function label(labels: Labels, key: string) {
-  return labels[key] ?? key;
-}
+type Named = { id: string; name: string };
 
 function amount(cents: number | null) {
   return cents === null ? "" : formatPlainAmount(cents);
 }
 
-function day(timestamp: string | null) {
-  return timestamp ? todayInSaoPaulo(new Date(timestamp)) : "";
-}
-
-function names(rows: Named[]) {
+function names(rows: readonly Named[]) {
   return new Map(rows.map(({ id, name }) => [id, name]));
 }
 
-export type TransactionExport = Pick<
-  Tables<"transactions">,
-  | "kind"
-  | "amount_cents"
-  | "occurred_on"
-  | "description"
-  | "category_id"
-  | "payment_kind"
-  | "card_id"
-  | "bill_due_on"
-  | "installment_number"
-  | "installment_count"
+export type HouseholdExport = Pick<
+  Tables<"households">,
+  | "id"
+  | "name"
+  | "side"
+  | "list"
+  | "phone"
+  | "address"
+  | "save_the_date_on"
+  | "invited_on"
+  | "gift"
+  | "thanked_on"
+>;
+export type GuestExport = Pick<
+  Tables<"guests">,
+  "household_id" | "name" | "age_band" | "rsvp" | "is_plus_one" | "dietary"
 >;
 
-export function transactionsCsv(
-  rows: TransactionExport[],
-  categories: Named[],
-  cards: Named[],
+export function guestsCsv(
+  households: readonly HouseholdExport[],
+  guests: readonly GuestExport[],
+  partners: { a: string; b: string },
+) {
+  const byId = new Map(households.map((h) => [h.id, h]));
+  const sides = { a: partners.a, b: partners.b, both: m.guests.sideBoth };
+  return toCsv(
+    [
+      column.household,
+      column.name,
+      column.side,
+      column.list,
+      column.age,
+      column.rsvp,
+      column.plusOne,
+      column.dietary,
+      column.phone,
+      column.address,
+      column.saveTheDate,
+      column.invited,
+      column.gift,
+      column.thanked,
+    ],
+    guests.flatMap((guest) => {
+      const h = byId.get(guest.household_id);
+      if (!h) return [];
+      return [
+        [
+          h.name,
+          guest.name,
+          sides[h.side],
+          m.lists[h.list],
+          m.ageBands[guest.age_band],
+          m.rsvp[guest.rsvp],
+          guest.is_plus_one ? column.yes : "",
+          guest.dietary,
+          h.phone,
+          h.address,
+          h.save_the_date_on,
+          h.invited_on,
+          h.gift,
+          h.thanked_on,
+        ],
+      ];
+    }),
+  );
+}
+
+export type TaskExport = Pick<
+  Tables<"tasks">,
+  | "title"
+  | "area"
+  | "offset_days"
+  | "due_on"
+  | "assignee_id"
+  | "assignee_label"
+  | "done_at"
+  | "notes"
+>;
+
+export function tasksCsv(
+  tasks: readonly TaskExport[],
+  weddingDate: string | null,
+  people: ReadonlyMap<string, string>,
+) {
+  return toCsv(
+    [
+      column.title,
+      column.area,
+      column.due,
+      column.assignee,
+      column.done,
+      column.notes,
+    ],
+    tasks.map((task) => [
+      task.title,
+      m.areas[task.area as keyof typeof m.areas] ?? task.area,
+      dueDate(task, weddingDate),
+      task.assignee_id
+        ? (people.get(task.assignee_id) ?? "")
+        : task.assignee_label,
+      task.done_at ? todayInSaoPaulo(new Date(task.done_at)) : "",
+      task.notes,
+    ]),
+  );
+}
+
+export type ExpenseExport = Pick<
+  Tables<"expenses">,
+  | "id"
+  | "category_id"
+  | "vendor_id"
+  | "title"
+  | "estimated_cents"
+  | "contracted_cents"
+>;
+export type PaymentExport = Pick<
+  Tables<"payments">,
+  | "expense_id"
+  | "amount_cents"
+  | "due_on"
+  | "paid_on"
+  | "method"
+  | "contributor_id"
+>;
+
+export function expensesCsv(
+  expenses: readonly ExpenseExport[],
+  payments: readonly PaymentExport[],
+  lookups: {
+    categories: readonly Named[];
+    vendors: readonly Named[];
+    contributors: readonly Named[];
+  },
+) {
+  const categoryNames = names(lookups.categories);
+  const vendorNames = names(lookups.vendors);
+  const contributorNames = names(lookups.contributors);
+  return toCsv(
+    [
+      column.category,
+      column.expense,
+      column.vendor,
+      column.estimated,
+      column.contracted,
+      column.amount,
+      column.dueOn,
+      column.paidOn,
+      column.method,
+      column.paidBy,
+    ],
+    expenses.flatMap((expense) => {
+      const base = [
+        categoryNames.get(expense.category_id) ?? "",
+        expense.title,
+        expense.vendor_id ? (vendorNames.get(expense.vendor_id) ?? "") : "",
+        amount(expense.estimated_cents),
+        amount(expense.contracted_cents),
+      ];
+      const own = payments.filter((p) => p.expense_id === expense.id);
+      if (own.length === 0) return [[...base, "", "", "", "", ""]];
+      return own.map((payment) => [
+        ...base,
+        amount(payment.amount_cents),
+        payment.due_on,
+        payment.paid_on,
+        payment.method ? m.methods[payment.method] : "",
+        payment.contributor_id
+          ? (contributorNames.get(payment.contributor_id) ?? "")
+          : "",
+      ]);
+    }),
+  );
+}
+
+export type VendorExport = Pick<
+  Tables<"vendors">,
+  | "name"
+  | "category_id"
+  | "status"
+  | "contact_name"
+  | "phone"
+  | "email"
+  | "instagram"
+  | "website"
+  | "quote_cents"
+  | "quote_details"
+  | "rating"
+  | "notes"
+>;
+
+export function vendorsCsv(
+  vendors: readonly VendorExport[],
+  categories: readonly Named[],
 ) {
   const categoryNames = names(categories);
-  const cardNames = names(cards);
   return toCsv(
     [
-      column.date,
-      column.kind,
-      column.amount,
-      column.description,
+      column.name,
       column.category,
-      column.payment,
-      column.card,
-      column.billDue,
-      column.installment,
+      column.status,
+      column.contact,
+      column.phone,
+      column.email,
+      column.instagram,
+      column.website,
+      column.quote,
+      column.quoteDetails,
+      column.rating,
+      column.notes,
     ],
-    rows.map((row) => [
-      row.occurred_on,
-      m.entry[row.kind],
-      amount(row.amount_cents),
-      row.description,
-      categoryNames.get(row.category_id),
-      m.payments[row.payment_kind],
-      row.card_id ? cardNames.get(row.card_id) : "",
-      row.bill_due_on,
-      row.installment_number && row.installment_count
-        ? m.exportData.installment(
-            row.installment_number,
-            row.installment_count,
-          )
-        : "",
-    ]),
-  );
-}
-
-export type JarEntryExport = Pick<
-  Tables<"jar_entries">,
-  "jar_id" | "kind" | "amount_cents" | "occurred_on" | "note" | "is_opening"
->;
-
-export function jarEntriesCsv(rows: JarEntryExport[], jars: Named[]) {
-  const jarNames = names(jars);
-  return toCsv(
-    [column.jar, column.date, column.kind, column.amount, column.note],
-    rows.map((row) => [
-      jarNames.get(row.jar_id),
-      row.occurred_on,
-      row.is_opening
-        ? m.jars.openingEntry
-        : row.kind === "deposit"
-          ? m.jars.depositEntry
-          : m.jars.withdrawalEntry,
-      amount(row.amount_cents),
-      row.note,
-    ]),
-  );
-}
-
-export type JarExport = Pick<
-  Tables<"jars">,
-  | "name"
-  | "icon"
-  | "color"
-  | "target_cents"
-  | "target_date"
-  | "planned_monthly_cents"
-  | "archived_at"
-  | "created_at"
->;
-
-export function jarsCsv(rows: JarExport[]) {
-  return toCsv(
-    [
-      column.name,
-      column.icon,
-      column.color,
-      column.goal,
-      column.deadline,
-      column.planned,
-      column.archivedAt,
-      column.createdAt,
-    ],
-    rows.map((row) => [
-      row.name,
-      label(m.icons, row.icon),
-      label(m.colors, row.color),
-      amount(row.target_cents),
-      row.target_date,
-      amount(row.planned_monthly_cents),
-      day(row.archived_at),
-      day(row.created_at),
-    ]),
-  );
-}
-
-export type CategoryExport = Pick<
-  Tables<"categories">,
-  | "name"
-  | "kind"
-  | "icon"
-  | "color"
-  | "monthly_limit_cents"
-  | "archived_at"
-  | "created_at"
->;
-
-export function categoriesCsv(rows: CategoryExport[]) {
-  return toCsv(
-    [
-      column.name,
-      column.kind,
-      column.icon,
-      column.color,
-      column.monthlyLimit,
-      column.archivedAt,
-      column.createdAt,
-    ],
-    rows.map((row) => [
-      row.name,
-      m.entry[row.kind],
-      label(m.icons, row.icon),
-      label(m.colors, row.color),
-      amount(row.monthly_limit_cents),
-      day(row.archived_at),
-      day(row.created_at),
-    ]),
-  );
-}
-
-export type CardExport = Pick<
-  Tables<"cards">,
-  | "name"
-  | "design"
-  | "best_purchase_day"
-  | "due_day"
-  | "archived_at"
-  | "created_at"
->;
-
-export function cardsCsv(rows: CardExport[]) {
-  return toCsv(
-    [
-      column.name,
-      column.design,
-      column.bestDay,
-      column.dueDay,
-      column.archivedAt,
-      column.createdAt,
-    ],
-    rows.map((row) => [
-      row.name,
-      label(m.cardDesigns, row.design),
-      row.best_purchase_day,
-      row.due_day,
-      day(row.archived_at),
-      day(row.created_at),
+    vendors.map((v) => [
+      v.name,
+      v.category_id ? (categoryNames.get(v.category_id) ?? "") : "",
+      m.vendorStatus[v.status],
+      v.contact_name,
+      v.phone,
+      v.email,
+      v.instagram,
+      v.website,
+      amount(v.quote_cents),
+      v.quote_details,
+      v.rating,
+      v.notes,
     ]),
   );
 }

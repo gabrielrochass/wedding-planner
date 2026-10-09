@@ -1,7 +1,11 @@
-# Contadinho
+# Sim a Dois
 
-Controle de gastos em pt-BR: lance gastos em poucos toques, veja quanto vai para cada categoria e acompanhe
-cofrinhos com previsão de quando você chega na meta. Grátis, sem anúncios.
+Planejamento de casamento em pt-BR, feito para o casal planejar a dois: checklist com os prazos do cartório e da
+igreja, orçamento com parcelas e quem ajuda a pagar, fornecedores em funil com comparação lado a lado e convidados
+por família, com triagem e WhatsApp a um toque. Grátis, sem anúncios e sem venda de contatos para fornecedores.
+
+Cada casamento tem uma equipe com papéis: casal (tudo), assessoria (edita tudo, menos a equipe), ajudante (edita
+convidados e tarefas) e só leitura. As regras valem no banco (RLS) e em cada Server Action.
 
 ## Rodando localmente
 
@@ -19,8 +23,12 @@ Preencha `.env.local` com as chaves que `supabase status` mostra (`PUBLISHABLE_K
 npm run dev
 ```
 
-Abra <http://localhost:3000>. Localmente, `DEV_AUTH=1` cria uma sessão de teste automaticamente, sem cadastro. Em
-produção cada pessoa cria a conta com e-mail e senha, sem confirmação por e-mail.
+Abra <http://localhost:3000>. Localmente, `DEV_AUTH=1` cria uma sessão de teste com um casamento de exemplo, sem
+cadastro; use `/dev/entrar?sem-casamento=1` para ver o onboarding. Em produção cada pessoa cria a conta com e-mail e
+senha, sem confirmação por e-mail.
+
+O Supabase local deste projeto usa as portas 5643x, para rodar ao lado de outros projetos. Depois de mudar uma
+migration, rode `supabase db reset` e `npm run db:types`.
 
 ## Qualidade
 

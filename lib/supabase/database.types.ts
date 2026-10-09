@@ -34,440 +34,1021 @@ export type Database = {
   }
   public: {
     Tables: {
-      cards: {
+      budget_categories: {
         Row: {
-          archived_at: string | null
-          best_purchase_day: number | null
-          created_at: string
-          design: string
-          due_day: number | null
-          id: string
-          name: string
-          sort_order: number
-          user_id: string
-        }
-        Insert: {
-          archived_at?: string | null
-          best_purchase_day?: number | null
-          created_at?: string
-          design: string
-          due_day?: number | null
-          id?: string
-          name: string
-          sort_order?: number
-          user_id?: string
-        }
-        Update: {
-          archived_at?: string | null
-          best_purchase_day?: number | null
-          created_at?: string
-          design?: string
-          due_day?: number | null
-          id?: string
-          name?: string
-          sort_order?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      categories: {
-        Row: {
-          archived_at: string | null
-          color: string
           created_at: string
           icon: string
           id: string
-          kind: Database["public"]["Enums"]["transaction_kind"]
-          monthly_limit_cents: number | null
           name: string
+          planned_cents: number | null
           sort_order: number
-          user_id: string
+          wedding_id: string
         }
         Insert: {
-          archived_at?: string | null
-          color: string
           created_at?: string
           icon: string
           id?: string
-          kind: Database["public"]["Enums"]["transaction_kind"]
-          monthly_limit_cents?: number | null
           name: string
+          planned_cents?: number | null
           sort_order?: number
-          user_id?: string
+          wedding_id: string
         }
         Update: {
-          archived_at?: string | null
-          color?: string
           created_at?: string
           icon?: string
           id?: string
-          kind?: Database["public"]["Enums"]["transaction_kind"]
-          monthly_limit_cents?: number | null
           name?: string
+          planned_cents?: number | null
           sort_order?: number
-          user_id?: string
-        }
-        Relationships: []
-      }
-      jar_entries: {
-        Row: {
-          amount_cents: number
-          created_at: string
-          id: string
-          is_opening: boolean
-          jar_id: string
-          kind: Database["public"]["Enums"]["jar_entry_kind"]
-          note: string | null
-          occurred_on: string
-          user_id: string
-        }
-        Insert: {
-          amount_cents: number
-          created_at?: string
-          id?: string
-          is_opening?: boolean
-          jar_id: string
-          kind: Database["public"]["Enums"]["jar_entry_kind"]
-          note?: string | null
-          occurred_on: string
-          user_id?: string
-        }
-        Update: {
-          amount_cents?: number
-          created_at?: string
-          id?: string
-          is_opening?: boolean
-          jar_id?: string
-          kind?: Database["public"]["Enums"]["jar_entry_kind"]
-          note?: string | null
-          occurred_on?: string
-          user_id?: string
+          wedding_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "jar_entries_jar_id_user_id_fkey"
-            columns: ["jar_id", "user_id"]
+            foreignKeyName: "budget_categories_wedding_id_fkey"
+            columns: ["wedding_id"]
             isOneToOne: false
-            referencedRelation: "jars"
-            referencedColumns: ["id", "user_id"]
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
           },
         ]
       }
-      jars: {
+      contributors: {
         Row: {
-          archived_at: string | null
-          color: string
           created_at: string
-          icon: string
           id: string
           name: string
-          planned_monthly_cents: number | null
+          promised_cents: number | null
           sort_order: number
-          target_cents: number | null
-          target_date: string | null
-          user_id: string
+          wedding_id: string
         }
         Insert: {
-          archived_at?: string | null
-          color: string
           created_at?: string
-          icon: string
           id?: string
           name: string
-          planned_monthly_cents?: number | null
+          promised_cents?: number | null
           sort_order?: number
-          target_cents?: number | null
-          target_date?: string | null
-          user_id?: string
+          wedding_id: string
         }
         Update: {
-          archived_at?: string | null
-          color?: string
           created_at?: string
-          icon?: string
           id?: string
           name?: string
-          planned_monthly_cents?: number | null
+          promised_cents?: number | null
           sort_order?: number
-          target_cents?: number | null
-          target_date?: string | null
-          user_id?: string
+          wedding_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contributors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
-      month_closings: {
+      expenses: {
         Row: {
-          closed_at: string
-          month: string
-          user_id: string
+          category_id: string
+          contracted_cents: number | null
+          created_at: string
+          estimated_cents: number | null
+          id: string
+          notes: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          vendor_id: string | null
+          wedding_id: string
         }
         Insert: {
-          closed_at?: string
-          month: string
-          user_id?: string
+          category_id: string
+          contracted_cents?: number | null
+          created_at?: string
+          estimated_cents?: number | null
+          id?: string
+          notes?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id?: string | null
+          wedding_id: string
         }
         Update: {
-          closed_at?: string
-          month?: string
-          user_id?: string
+          category_id?: string
+          contracted_cents?: number | null
+          created_at?: string
+          estimated_cents?: number | null
+          id?: string
+          notes?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id?: string | null
+          wedding_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_wedding_id_fkey"
+            columns: ["category_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "expenses_vendor_id_wedding_id_fkey"
+            columns: ["vendor_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "expenses_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      guests: {
+        Row: {
+          age_band: Database["public"]["Enums"]["age_band"]
+          created_at: string
+          dietary: string | null
+          household_id: string
+          id: string
+          is_plus_one: boolean
+          name: string
+          rsvp: Database["public"]["Enums"]["rsvp_status"]
+          sort_order: number
+          updated_at: string
+          updated_by: string | null
+          wedding_id: string
+        }
+        Insert: {
+          age_band?: Database["public"]["Enums"]["age_band"]
+          created_at?: string
+          dietary?: string | null
+          household_id: string
+          id?: string
+          is_plus_one?: boolean
+          name: string
+          rsvp?: Database["public"]["Enums"]["rsvp_status"]
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id: string
+        }
+        Update: {
+          age_band?: Database["public"]["Enums"]["age_band"]
+          created_at?: string
+          dietary?: string | null
+          household_id?: string
+          id?: string
+          is_plus_one?: boolean
+          name?: string
+          rsvp?: Database["public"]["Enums"]["rsvp_status"]
+          sort_order?: number
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_household_id_wedding_id_fkey"
+            columns: ["household_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "guests_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_items: {
+        Row: {
+          created_at: string
+          estimate_cents: number | null
+          household_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          paid_cents: number | null
+          priority: Database["public"]["Enums"]["home_priority"]
+          quantity: number
+          room: string
+          status: Database["public"]["Enums"]["home_status"]
+          store: string | null
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+          wedding_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimate_cents?: number | null
+          household_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          paid_cents?: number | null
+          priority?: Database["public"]["Enums"]["home_priority"]
+          quantity?: number
+          room?: string
+          status?: Database["public"]["Enums"]["home_status"]
+          store?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          wedding_id: string
+        }
+        Update: {
+          created_at?: string
+          estimate_cents?: number | null
+          household_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          paid_cents?: number | null
+          priority?: Database["public"]["Enums"]["home_priority"]
+          quantity?: number
+          room?: string
+          status?: Database["public"]["Enums"]["home_status"]
+          store?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_items_household_id_wedding_id_fkey"
+            columns: ["household_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "households"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "home_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      households: {
+        Row: {
+          address: string | null
+          created_at: string
+          gift: string | null
+          id: string
+          invited_on: string | null
+          list: Database["public"]["Enums"]["guest_list"]
+          name: string
+          notes: string | null
+          phone: string | null
+          save_the_date_on: string | null
+          side: Database["public"]["Enums"]["guest_side"]
+          thanked_on: string | null
+          updated_at: string
+          updated_by: string | null
+          wedding_id: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          gift?: string | null
+          id?: string
+          invited_on?: string | null
+          list?: Database["public"]["Enums"]["guest_list"]
+          name: string
+          notes?: string | null
+          phone?: string | null
+          save_the_date_on?: string | null
+          side?: Database["public"]["Enums"]["guest_side"]
+          thanked_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          gift?: string | null
+          id?: string
+          invited_on?: string | null
+          list?: Database["public"]["Enums"]["guest_list"]
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          save_the_date_on?: string | null
+          side?: Database["public"]["Enums"]["guest_side"]
+          thanked_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "households_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ideas: {
+        Row: {
+          board: string
+          created_at: string
+          estimate_cents: number | null
+          id: string
+          image_path: string | null
+          notes: string | null
+          status: Database["public"]["Enums"]["idea_status"]
+          title: string
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          board?: string
+          created_at?: string
+          estimate_cents?: number | null
+          id?: string
+          image_path?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["idea_status"]
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          board?: string
+          created_at?: string
+          estimate_cents?: number | null
+          id?: string
+          image_path?: string | null
+          notes?: string | null
+          status?: Database["public"]["Enums"]["idea_status"]
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ideas_vendor_id_wedding_id_fkey"
+            columns: ["vendor_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "ideas_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      party_members: {
+        Row: {
+          attire: string | null
+          created_at: string
+          entrance_order: number
+          id: string
+          invite_status: Database["public"]["Enums"]["party_invite"]
+          name: string
+          notes: string | null
+          pair_id: string | null
+          phone: string | null
+          role: string
+          side: Database["public"]["Enums"]["guest_side"]
+          updated_at: string
+          updated_by: string | null
+          wedding_id: string
+        }
+        Insert: {
+          attire?: string | null
+          created_at?: string
+          entrance_order?: number
+          id?: string
+          invite_status?: Database["public"]["Enums"]["party_invite"]
+          name: string
+          notes?: string | null
+          pair_id?: string | null
+          phone?: string | null
+          role: string
+          side?: Database["public"]["Enums"]["guest_side"]
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id: string
+        }
+        Update: {
+          attire?: string | null
+          created_at?: string
+          entrance_order?: number
+          id?: string
+          invite_status?: Database["public"]["Enums"]["party_invite"]
+          name?: string
+          notes?: string | null
+          pair_id?: string | null
+          phone?: string | null
+          role?: string
+          side?: Database["public"]["Enums"]["guest_side"]
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "party_members_pair_id_wedding_id_fkey"
+            columns: ["pair_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "party_members"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "party_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          contributor_id: string | null
+          created_at: string
+          due_on: string
+          expense_id: string
+          id: string
+          installment_count: number | null
+          installment_number: number | null
+          method: Database["public"]["Enums"]["payment_method"] | null
+          note: string | null
+          paid_on: string | null
+          updated_at: string
+          updated_by: string | null
+          wedding_id: string
+        }
+        Insert: {
+          amount_cents: number
+          contributor_id?: string | null
+          created_at?: string
+          due_on: string
+          expense_id: string
+          id?: string
+          installment_count?: number | null
+          installment_number?: number | null
+          method?: Database["public"]["Enums"]["payment_method"] | null
+          note?: string | null
+          paid_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id: string
+        }
+        Update: {
+          amount_cents?: number
+          contributor_id?: string | null
+          created_at?: string
+          due_on?: string
+          expense_id?: string
+          id?: string
+          installment_count?: number | null
+          installment_number?: number | null
+          method?: Database["public"]["Enums"]["payment_method"] | null
+          note?: string | null
+          paid_on?: string | null
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_contributor_id_wedding_id_fkey"
+            columns: ["contributor_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "contributors"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_expense_id_wedding_id_fkey"
+            columns: ["expense_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "payments_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
-          closing_snoozed_month: string | null
           created_at: string
+          current_wedding_id: string | null
           display_name: string | null
           id: string
-          onboarding_done_at: string | null
-          transaction_count: number
         }
         Insert: {
-          closing_snoozed_month?: string | null
           created_at?: string
+          current_wedding_id?: string | null
           display_name?: string | null
           id: string
-          onboarding_done_at?: string | null
-          transaction_count?: number
         }
         Update: {
-          closing_snoozed_month?: string | null
           created_at?: string
+          current_wedding_id?: string | null
           display_name?: string | null
           id?: string
-          onboarding_done_at?: string | null
-          transaction_count?: number
-        }
-        Relationships: []
-      }
-      transactions: {
-        Row: {
-          amount_cents: number
-          bill_closes_on: string | null
-          bill_due_on: string | null
-          card_id: string | null
-          category_id: string
-          created_at: string
-          description: string | null
-          description_norm: string | null
-          id: string
-          installment_count: number | null
-          installment_group_id: string | null
-          installment_number: number | null
-          installment_purchased_on: string | null
-          kind: Database["public"]["Enums"]["transaction_kind"]
-          occurred_on: string
-          payment_kind: Database["public"]["Enums"]["payment_kind"]
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          amount_cents: number
-          bill_closes_on?: string | null
-          bill_due_on?: string | null
-          card_id?: string | null
-          category_id: string
-          created_at?: string
-          description?: string | null
-          description_norm?: string | null
-          id?: string
-          installment_count?: number | null
-          installment_group_id?: string | null
-          installment_number?: number | null
-          installment_purchased_on?: string | null
-          kind: Database["public"]["Enums"]["transaction_kind"]
-          occurred_on: string
-          payment_kind: Database["public"]["Enums"]["payment_kind"]
-          updated_at?: string
-          user_id?: string
-        }
-        Update: {
-          amount_cents?: number
-          bill_closes_on?: string | null
-          bill_due_on?: string | null
-          card_id?: string | null
-          category_id?: string
-          created_at?: string
-          description?: string | null
-          description_norm?: string | null
-          id?: string
-          installment_count?: number | null
-          installment_group_id?: string | null
-          installment_number?: number | null
-          installment_purchased_on?: string | null
-          kind?: Database["public"]["Enums"]["transaction_kind"]
-          occurred_on?: string
-          payment_kind?: Database["public"]["Enums"]["payment_kind"]
-          updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "transactions_card_id_user_id_fkey"
-            columns: ["card_id", "user_id"]
+            foreignKeyName: "profiles_current_wedding_id_fkey"
+            columns: ["current_wedding_id"]
             isOneToOne: false
-            referencedRelation: "cards"
-            referencedColumns: ["id", "user_id"]
-          },
-          {
-            foreignKeyName: "transactions_category_id_user_id_kind_fkey"
-            columns: ["category_id", "user_id", "kind"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id", "user_id", "kind"]
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
           },
         ]
+      }
+      songs: {
+        Row: {
+          artist: string | null
+          chosen: boolean
+          created_at: string
+          id: string
+          moment: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          url: string | null
+          wedding_id: string
+        }
+        Insert: {
+          artist?: string | null
+          chosen?: boolean
+          created_at?: string
+          id?: string
+          moment: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          wedding_id: string
+        }
+        Update: {
+          artist?: string | null
+          chosen?: boolean
+          created_at?: string
+          id?: string
+          moment?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          url?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "songs_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          area: string
+          assignee_id: string | null
+          assignee_label: string | null
+          created_at: string
+          done_at: string | null
+          due_on: string | null
+          id: string
+          notes: string | null
+          offset_days: number | null
+          template_key: string | null
+          title: string
+          updated_at: string
+          updated_by: string | null
+          vendor_id: string | null
+          wedding_id: string
+        }
+        Insert: {
+          area?: string
+          assignee_id?: string | null
+          assignee_label?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_on?: string | null
+          id?: string
+          notes?: string | null
+          offset_days?: number | null
+          template_key?: string | null
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id?: string | null
+          wedding_id: string
+        }
+        Update: {
+          area?: string
+          assignee_id?: string | null
+          assignee_label?: string | null
+          created_at?: string
+          done_at?: string | null
+          due_on?: string | null
+          id?: string
+          notes?: string | null
+          offset_days?: number | null
+          template_key?: string | null
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          vendor_id?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_vendor_id_wedding_id_fkey"
+            columns: ["vendor_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "tasks_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timeline_items: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          notes: string | null
+          place: string | null
+          responsible: string | null
+          song_id: string | null
+          starts_at: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+          wedding_id: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          notes?: string | null
+          place?: string | null
+          responsible?: string | null
+          song_id?: string | null
+          starts_at: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          notes?: string | null
+          place?: string | null
+          responsible?: string | null
+          song_id?: string | null
+          starts_at?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_items_song_id_wedding_id_fkey"
+            columns: ["song_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "songs"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "timeline_items_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vendors: {
+        Row: {
+          capacity: number | null
+          category_id: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          instagram: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          quote_cents: number | null
+          quote_details: string | null
+          rating: number | null
+          status: Database["public"]["Enums"]["vendor_status"]
+          updated_at: string
+          updated_by: string | null
+          visit_on: string | null
+          website: string | null
+          wedding_id: string
+        }
+        Insert: {
+          capacity?: number | null
+          category_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          quote_cents?: number | null
+          quote_details?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          updated_by?: string | null
+          visit_on?: string | null
+          website?: string | null
+          wedding_id: string
+        }
+        Update: {
+          capacity?: number | null
+          category_id?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          instagram?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          quote_cents?: number | null
+          quote_details?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["vendor_status"]
+          updated_at?: string
+          updated_by?: string | null
+          visit_on?: string | null
+          website?: string | null
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_category_id_wedding_id_fkey"
+            columns: ["category_id", "wedding_id"]
+            isOneToOne: false
+            referencedRelation: "budget_categories"
+            referencedColumns: ["id", "wedding_id"]
+          },
+          {
+            foreignKeyName: "vendors_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          role: Database["public"]["Enums"]["member_role"]
+          token_hash: string
+          wedding_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["member_role"]
+          token_hash: string
+          wedding_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          token_hash?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_invites_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wedding_members: {
+        Row: {
+          created_at: string
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string
+          wedding_id: string
+        }
+        Insert: {
+          created_at?: string
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string
+          wedding_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          user_id?: string
+          wedding_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wedding_members_wedding_id_fkey"
+            columns: ["wedding_id"]
+            isOneToOne: false
+            referencedRelation: "weddings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weddings: {
+        Row: {
+          budget_cents: number | null
+          ceremony: Database["public"]["Enums"]["ceremony_kind"]
+          city: string | null
+          contingency_percent: number
+          created_at: string
+          created_by: string | null
+          guest_estimate: number | null
+          id: string
+          motto: string | null
+          partner_a: string
+          partner_b: string
+          wedding_date: string | null
+        }
+        Insert: {
+          budget_cents?: number | null
+          ceremony?: Database["public"]["Enums"]["ceremony_kind"]
+          city?: string | null
+          contingency_percent?: number
+          created_at?: string
+          created_by?: string | null
+          guest_estimate?: number | null
+          id?: string
+          motto?: string | null
+          partner_a: string
+          partner_b: string
+          wedding_date?: string | null
+        }
+        Update: {
+          budget_cents?: number | null
+          ceremony?: Database["public"]["Enums"]["ceremony_kind"]
+          city?: string | null
+          contingency_percent?: number
+          created_at?: string
+          created_by?: string | null
+          guest_estimate?: number | null
+          id?: string
+          motto?: string | null
+          partner_a?: string
+          partner_b?: string
+          wedding_date?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      above_normal: {
-        Args: { p_month: string }
-        Returns: {
-          category_id: string
-          spent_cents: number
-          usual_cents: number
-        }[]
-      }
-      category_totals: {
-        Args: { p_from: string; p_to: string }
-        Returns: {
-          category_id: string
-          entries: number
-          total_cents: number
-        }[]
-      }
-      create_installment_purchase: {
+      accept_invite: { Args: { p_token: string }; Returns: string }
+      create_invite: {
         Args: {
-          p_card_id: string
-          p_category_id: string
-          p_count: number
-          p_description: string
-          p_group_id: string
-          p_purchased_on: string
-          p_total_cents: number
-        }
-        Returns: undefined
-      }
-      create_jar: {
-        Args: {
-          p_color: string
-          p_icon: string
-          p_id: string
-          p_name: string
-          p_opening_cents?: number
-          p_opening_on: string
-          p_planned_monthly_cents?: number
-          p_target_cents?: number
-          p_target_date?: string
-        }
-        Returns: undefined
-      }
-      filtered_day_totals: {
-        Args: {
-          p_card_id?: string
-          p_category_id?: string
-          p_from?: string
-          p_kind?: Database["public"]["Enums"]["transaction_kind"]
-          p_payment_kind?: Database["public"]["Enums"]["payment_kind"]
-          p_query?: string
-          p_to?: string
-        }
-        Returns: {
-          day: string
-          entries: number
-          expense_cents: number
-          income_cents: number
-          total_entries: number
-          total_expense_cents: number
-          total_income_cents: number
-        }[]
-      }
-      filtered_transactions: {
-        Args: {
-          p_card_id?: string
-          p_category_id?: string
-          p_from?: string
-          p_kind?: Database["public"]["Enums"]["transaction_kind"]
-          p_payment_kind?: Database["public"]["Enums"]["payment_kind"]
-          p_query?: string
-          p_to?: string
-        }
-        Returns: {
-          amount_cents: number
-          bill_closes_on: string | null
-          bill_due_on: string | null
-          card_id: string | null
-          category_id: string
-          created_at: string
-          description: string | null
-          description_norm: string | null
-          id: string
-          installment_count: number | null
-          installment_group_id: string | null
-          installment_number: number | null
-          installment_purchased_on: string | null
-          kind: Database["public"]["Enums"]["transaction_kind"]
-          occurred_on: string
-          payment_kind: Database["public"]["Enums"]["payment_kind"]
-          updated_at: string
-          user_id: string
-        }[]
-        SetofOptions: {
-          from: "*"
-          to: "transactions"
-          isOneToOne: false
-          isSetofReturn: true
-        }
-      }
-      jar_months: {
-        Args: { p_from: string; p_to: string }
-        Returns: {
-          jar_id: string
-          month: string
-          net_cents: number
-        }[]
-      }
-      jar_totals: {
-        Args: never
-        Returns: {
-          balance_cents: number
-          first_month: string
-          jar_id: string
-          opening_cents: number
-        }[]
-      }
-      month_totals: {
-        Args: { p_category_id?: string; p_from: string; p_to: string }
-        Returns: {
-          expense_cents: number
-          income_cents: number
-          month: string
-        }[]
-      }
-      restore_transactions: { Args: { p_ids: string[] }; Returns: number }
-      suggest_category: {
-        Args: {
-          p_description: string
-          p_kind: Database["public"]["Enums"]["transaction_kind"]
+          p_role: Database["public"]["Enums"]["member_role"]
+          p_wedding: string
         }
         Returns: string
       }
-      top_descriptions: {
-        Args: { p_category_id?: string; p_from: string; p_to: string }
+      create_wedding: {
+        Args: {
+          p_budget_cents?: number
+          p_categories: Json
+          p_ceremony: Database["public"]["Enums"]["ceremony_kind"]
+          p_city?: string
+          p_contributor: string
+          p_date?: string
+          p_guest_estimate?: number
+          p_id: string
+          p_partner_a: string
+          p_partner_b: string
+          p_tasks: Json
+        }
+        Returns: string
+      }
+      hire_vendor: {
+        Args: {
+          p_category_id: string
+          p_contracted_cents: number
+          p_expense_id: string
+          p_payments: Json
+          p_title: string
+          p_vendor_id: string
+        }
+        Returns: undefined
+      }
+      invite_preview: {
+        Args: { p_token: string }
         Returns: {
-          description: string
-          entries: number
-          total_cents: number
+          already_member: boolean
+          partner_a: string
+          partner_b: string
+          role: Database["public"]["Enums"]["member_role"]
+        }[]
+      }
+      wedding_people: {
+        Args: { p_wedding: string }
+        Returns: {
+          display_name: string
+          joined_at: string
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string
         }[]
       }
     }
     Enums: {
-      jar_entry_kind: "deposit" | "withdrawal"
-      payment_kind: "pix" | "boleto" | "card"
-      transaction_kind: "expense" | "income"
+      age_band: "adult" | "teen" | "child" | "baby"
+      ceremony_kind: "civil" | "religious" | "both"
+      guest_list: "pending" | "a" | "b" | "out"
+      guest_side: "a" | "b" | "both"
+      home_priority: "essential" | "important" | "nice"
+      home_status: "missing" | "wishlist" | "bought" | "gifted"
+      idea_status: "idea" | "approved" | "discarded"
+      member_role: "couple" | "planner" | "helper" | "viewer"
+      party_invite: "pending" | "ordered" | "delivered"
+      payment_method: "pix" | "boleto" | "card" | "cash" | "transfer"
+      rsvp_status: "pending" | "yes" | "no"
+      vendor_status:
+        | "researching"
+        | "quoted"
+        | "visiting"
+        | "favorite"
+        | "hired"
+        | "discarded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -598,9 +1179,25 @@ export const Constants = {
   },
   public: {
     Enums: {
-      jar_entry_kind: ["deposit", "withdrawal"],
-      payment_kind: ["pix", "boleto", "card"],
-      transaction_kind: ["expense", "income"],
+      age_band: ["adult", "teen", "child", "baby"],
+      ceremony_kind: ["civil", "religious", "both"],
+      guest_list: ["pending", "a", "b", "out"],
+      guest_side: ["a", "b", "both"],
+      home_priority: ["essential", "important", "nice"],
+      home_status: ["missing", "wishlist", "bought", "gifted"],
+      idea_status: ["idea", "approved", "discarded"],
+      member_role: ["couple", "planner", "helper", "viewer"],
+      party_invite: ["pending", "ordered", "delivered"],
+      payment_method: ["pix", "boleto", "card", "cash", "transfer"],
+      rsvp_status: ["pending", "yes", "no"],
+      vendor_status: [
+        "researching",
+        "quoted",
+        "visiting",
+        "favorite",
+        "hired",
+        "discarded",
+      ],
     },
   },
 } as const

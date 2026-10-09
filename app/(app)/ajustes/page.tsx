@@ -1,8 +1,8 @@
 import {
-  CreditCardIcon,
-  ShapesIcon,
-  SparklesIcon,
+  DownloadIcon,
+  HeartIcon,
   UserRoundIcon,
+  UsersRoundIcon,
 } from "lucide-react";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/app-shell/page-header";
@@ -19,18 +19,18 @@ export default function SettingsPage() {
         <SettingsLinks
           links={[
             {
-              href: "/ajustes/categorias",
-              title: m.settings.categories,
-              hint: m.settings.categoriesHint,
-              icon: ShapesIcon,
-              color: "chart-1",
+              href: "/ajustes/casamento",
+              title: m.wedding.title,
+              hint: m.wedding.hint,
+              icon: HeartIcon,
+              color: "chart-5",
             },
             {
-              href: "/ajustes/cartoes",
-              title: m.settings.cards,
-              hint: m.settings.cardsHint,
-              icon: CreditCardIcon,
-              color: "chart-2",
+              href: "/equipe",
+              title: m.team.title,
+              hint: m.team.hint,
+              icon: UsersRoundIcon,
+              color: "chart-1",
             },
           ]}
         />
@@ -44,11 +44,11 @@ export default function SettingsPage() {
               color: "chart-other",
             },
             {
-              href: "/?tour=1",
-              title: m.tour.replay,
-              hint: m.tour.replayHint,
-              icon: SparklesIcon,
-              color: "chart-5",
+              href: "/ajustes/conta/exportar",
+              title: m.account.export,
+              hint: m.account.exportHint,
+              icon: DownloadIcon,
+              color: "chart-3",
             },
           ]}
         />

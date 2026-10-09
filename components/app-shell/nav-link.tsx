@@ -8,11 +8,9 @@ export function NavLink({
   href,
   className,
   children,
-  tour,
 }: {
   href: Route;
   className: string;
-  tour?: string;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -23,7 +21,6 @@ export function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      data-tour={tour}
       className={className}
     >
       {children}

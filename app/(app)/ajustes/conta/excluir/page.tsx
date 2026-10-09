@@ -2,7 +2,8 @@ import { DownloadIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/app-shell/page-header";
-import { DeleteAccountForm } from "@/components/settings/delete-account-form";
+import { ConfirmForm } from "@/components/settings/confirm-form";
+import { deleteAccount } from "@/lib/account-actions";
 import { m } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: m.account.delete };
@@ -39,7 +40,12 @@ export default function DeleteAccountPage() {
           <DownloadIcon aria-hidden="true" className="size-5" />
           {m.account.deleteExportFirst}
         </Link>
-        <DeleteAccountForm />
+        <ConfirmForm
+          action={deleteAccount}
+          confirm={m.account.deleteConfirm}
+          label={m.account.delete}
+          pendingLabel={m.account.deleting}
+        />
       </div>
     </>
   );

@@ -12,7 +12,7 @@ import {
 } from "react";
 import { AuthField } from "@/components/auth/auth-field";
 import { AuthLegal } from "@/components/auth/auth-legal";
-import { Tally } from "@/components/brand/tally";
+import { StepDots } from "@/components/forms/step-dots";
 import { Button } from "@/components/ui/button";
 import { authErrorMessage } from "@/lib/auth-errors";
 import { withNext } from "@/lib/auth-paths";
@@ -21,7 +21,7 @@ import { m } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-export const signupSteps = 5;
+export const signupSteps = 3;
 
 type Step = "name" | "email" | "password" | "confirm";
 
@@ -154,7 +154,7 @@ export function SignupFlow({ next }: { next: string }) {
         ) : (
           <span />
         )}
-        <Tally lit={index + 1} className="h-7 w-9" />
+        <StepDots total={signupSteps} current={index} />
       </div>
 
       <div key={step} className="flex animate-step-in flex-col gap-5">
@@ -223,7 +223,7 @@ export function SignupFlow({ next }: { next: string }) {
             <p
               className={cn(
                 "-mt-3 flex items-center gap-1.5 text-footnote",
-                longEnough ? "text-income" : "text-muted-foreground",
+                longEnough ? "text-success" : "text-muted-foreground",
               )}
             >
               <CheckMark done={longEnough} />

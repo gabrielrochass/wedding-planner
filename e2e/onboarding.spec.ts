@@ -1,57 +1,59 @@
 import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./axe";
 
-test.describe.configure({ mode: "serial" });
-
-const longCategory = "Alimentação fora de casa e restaurantes";
-const longCard = "Nubank Ultravioleta Mastercard Black PF";
-
-test("a new user is guided to the first category", async ({ page }) => {
-  await page.goto("/dev/entrar?as=novo&next=/lancamentos/novo");
-  const newCategory = page.getByRole("textbox", { name: "Nova categoria" });
-  await expect(newCategory).toBeVisible();
-  await expect(newCategory).not.toBeFocused();
-
-  await page.getByLabel("Valor").fill("1000");
-  await page.getByRole("button", { name: "Adicionar despesa" }).click();
-  await expect(page.locator("output")).toHaveText("Escolha uma categoria");
-  await expect(newCategory).toBeFocused();
+test("a new couple sets up the wedding in four answers", async ({
+  page,
+}, testInfo) => {
+  await page.goto(
+    `/dev/entrar?as=novo-${testInfo.project.name}&sem-casamento=1&next=/`,
+  );
+  await expect(page).toHaveURL("/comecar");
+  await expect(page.getByLabel("Primeiro nome")).toHaveValue("Ana");
   await expectNoAxeViolations(page);
 
-  await newCategory.fill(longCategory);
-  await newCategory.press("Enter");
-  await expect(page.getByRole("radio", { name: longCategory })).toBeChecked();
-  await expect(page.locator("output")).toHaveText(
-    `Categoria “${longCategory}” criada e selecionada`,
+  await page.getByRole("button", { name: "Continuar" }).click();
+  await expect(page.getByRole("main").locator("output")).toHaveText(
+    "Escreva os dois nomes",
   );
+  await page.getByLabel("Segundo nome").fill("Bruno");
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Quando é o grande dia?" }),
+  ).toBeFocused();
+  await page.getByLabel("Data do casamento").fill("2028-02-20");
+  await page.getByLabel("Cidade").fill("Recife");
+  await expectNoAxeViolations(page);
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await page
+    .getByRole("radio", { name: "Religioso com efeito civil" })
+    .check({ force: true });
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await page.getByLabel("Quantos convidados, mais ou menos").fill("150");
+  await page.getByLabel("Quanto querem gastar, mais ou menos").fill("8000000");
+  await page.getByRole("button", { name: "Criar nosso casamento" }).click();
+
+  await expect(
+    page.getByRole("heading", { name: "Tudo pronto!" }),
+  ).toBeVisible();
+  await expectNoAxeViolations(page);
+  await page.getByRole("button", { name: "Ana e Bruno" }).click();
+  await expect(page).toHaveURL("/");
+  await expect(page.getByRole("main").getByText("Ana e Bruno")).toBeVisible();
+  await expect(page.getByText("dias para o sim")).toBeVisible();
+
+  await page.goto("/tarefas");
+  await expect(
+    page.getByText("Registrar o casamento religioso no cartório"),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Fazer a inscrição no curso de noivos"),
+  ).toBeVisible();
 });
 
-test("pressing Enter on a card design creates the card, not the entry", async ({
-  page,
-}) => {
-  await page.goto("/dev/entrar?as=novo&next=/lancamentos/novo");
-  await page.getByRole("button", { name: "Novo cartão" }).click();
-  await page.getByRole("textbox", { name: "Novo cartão" }).fill(longCard);
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("radio", { name: "Meia-noite" })).toBeChecked();
-  await page.keyboard.press("Enter");
-
-  await expect(page.getByRole("radio", { name: longCard })).toBeChecked();
-  await expect(page).toHaveURL("/lancamentos/novo");
-});
-
-test("long names stay inside a 320px screen", async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 640 });
-  await page.goto("/dev/entrar?as=novo&next=/lancamentos/novo");
-  await expect(page.getByRole("radio", { name: longCard })).toBeVisible();
-
-  const overflow = await page.evaluate(
-    () => document.documentElement.scrollWidth - window.innerWidth,
-  );
-  expect(overflow).toBeLessThanOrEqual(0);
-  const barOverflow = await page
-    .locator("[data-entry-bar]")
-    .evaluate((bar) => bar.scrollWidth - bar.clientWidth);
-  expect(barOverflow).toBeLessThanOrEqual(0);
+test("a person with a wedding skips the setup", async ({ page }) => {
+  await page.goto("/dev/entrar?as=ja-casando&next=/comecar");
+  await expect(page).toHaveURL("/");
 });

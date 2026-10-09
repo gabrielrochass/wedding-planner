@@ -4,13 +4,7 @@ import { DownloadIcon } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToday } from "@/hooks/use-today";
-import {
-  cardsCsv,
-  categoriesCsv,
-  jarEntriesCsv,
-  jarsCsv,
-  transactionsCsv,
-} from "@/lib/export";
+import { expensesCsv, guestsCsv, tasksCsv, vendorsCsv } from "@/lib/export";
 import { m } from "@/lib/i18n";
 import { createClient } from "@/lib/supabase/client";
 
@@ -30,85 +24,131 @@ async function fetchAll<T>(page: (from: number, to: number) => Page<T>) {
   }
 }
 
-function names(supabase: Supabase, table: "categories" | "cards" | "jars") {
-  return fetchAll((from, to) =>
-    supabase.from(table).select("id, name").order("id").range(from, to),
+type Context = {
+  weddingId: string;
+  weddingDate: string | null;
+  partners: { a: string; b: string };
+  people: [string, string][];
+};
+
+function rows<T>(
+  supabase: Supabase,
+  table:
+    | "households"
+    | "guests"
+    | "tasks"
+    | "expenses"
+    | "payments"
+    | "vendors"
+    | "budget_categories"
+    | "contributors",
+  columns: string,
+  weddingId: string,
+) {
+  return fetchAll<T>(
+    (from, to) =>
+      supabase
+        .from(table)
+        .select(columns)
+        .eq("wedding_id", weddingId)
+        .order("created_at")
+        .order("id")
+        .range(from, to) as unknown as Page<T>,
   );
 }
 
 const files = {
-  transactions: async (supabase: Supabase) => {
-    const [rows, categories, cards] = await Promise.all([
-      fetchAll((from, to) =>
-        supabase
-          .from("transactions")
-          .select(
-            "kind, amount_cents, occurred_on, description, category_id, payment_kind, card_id, bill_due_on, installment_number, installment_count",
-          )
-          .order("occurred_on")
-          .order("created_at")
-          .order("id")
-          .range(from, to),
+  guests: async (supabase: Supabase, context: Context) => {
+    const [households, guests] = await Promise.all([
+      rows<Parameters<typeof guestsCsv>[0][number]>(
+        supabase,
+        "households",
+        "id, name, side, list, phone, address, save_the_date_on, invited_on, gift, thanked_on",
+        context.weddingId,
       ),
-      names(supabase, "categories"),
-      names(supabase, "cards"),
-    ]);
-    return { rows: rows.length, csv: transactionsCsv(rows, categories, cards) };
-  },
-  jarEntries: async (supabase: Supabase) => {
-    const [rows, jars] = await Promise.all([
-      fetchAll((from, to) =>
-        supabase
-          .from("jar_entries")
-          .select("jar_id, kind, amount_cents, occurred_on, note, is_opening")
-          .order("occurred_on")
-          .order("created_at")
-          .order("id")
-          .range(from, to),
+      rows<Parameters<typeof guestsCsv>[1][number]>(
+        supabase,
+        "guests",
+        "household_id, name, age_band, rsvp, is_plus_one, dietary",
+        context.weddingId,
       ),
-      names(supabase, "jars"),
     ]);
-    return { rows: rows.length, csv: jarEntriesCsv(rows, jars) };
+    return {
+      rows: guests.length,
+      csv: guestsCsv(households, guests, context.partners),
+    };
   },
-  jars: async (supabase: Supabase) => {
-    const rows = await fetchAll((from, to) =>
-      supabase
-        .from("jars")
-        .select(
-          "name, icon, color, target_cents, target_date, planned_monthly_cents, archived_at, created_at",
-        )
-        .order("created_at")
-        .order("id")
-        .range(from, to),
+  tasks: async (supabase: Supabase, context: Context) => {
+    const tasks = await rows<Parameters<typeof tasksCsv>[0][number]>(
+      supabase,
+      "tasks",
+      "title, area, offset_days, due_on, assignee_id, assignee_label, done_at, notes",
+      context.weddingId,
     );
-    return { rows: rows.length, csv: jarsCsv(rows) };
+    return {
+      rows: tasks.length,
+      csv: tasksCsv(tasks, context.weddingDate, new Map(context.people)),
+    };
   },
-  categories: async (supabase: Supabase) => {
-    const rows = await fetchAll((from, to) =>
-      supabase
-        .from("categories")
-        .select(
-          "name, kind, icon, color, monthly_limit_cents, archived_at, created_at",
-        )
-        .order("kind")
-        .order("created_at")
-        .order("id")
-        .range(from, to),
-    );
-    return { rows: rows.length, csv: categoriesCsv(rows) };
+  expenses: async (supabase: Supabase, context: Context) => {
+    const [expenses, payments, categories, vendors, contributors] =
+      await Promise.all([
+        rows<Parameters<typeof expensesCsv>[0][number]>(
+          supabase,
+          "expenses",
+          "id, category_id, vendor_id, title, estimated_cents, contracted_cents",
+          context.weddingId,
+        ),
+        rows<Parameters<typeof expensesCsv>[1][number]>(
+          supabase,
+          "payments",
+          "expense_id, amount_cents, due_on, paid_on, method, contributor_id",
+          context.weddingId,
+        ),
+        rows<{ id: string; name: string }>(
+          supabase,
+          "budget_categories",
+          "id, name",
+          context.weddingId,
+        ),
+        rows<{ id: string; name: string }>(
+          supabase,
+          "vendors",
+          "id, name",
+          context.weddingId,
+        ),
+        rows<{ id: string; name: string }>(
+          supabase,
+          "contributors",
+          "id, name",
+          context.weddingId,
+        ),
+      ]);
+    return {
+      rows: payments.length || expenses.length,
+      csv: expensesCsv(expenses, payments, {
+        categories,
+        vendors,
+        contributors,
+      }),
+    };
   },
-  cards: async (supabase: Supabase) => {
-    const rows = await fetchAll((from, to) =>
-      supabase
-        .from("cards")
-        .select(
-          "name, design, best_purchase_day, due_day, archived_at, created_at",
-        )
-        .order("created_at")
-        .order("id")
-        .range(from, to),
-    );
-    return { rows: rows.length, csv: cardsCsv(rows) };
+  vendors: async (supabase: Supabase, context: Context) => {
+    const [vendors, categories] = await Promise.all([
+      rows<Parameters<typeof vendorsCsv>[0][number]>(
+        supabase,
+        "vendors",
+        "name, category_id, status, contact_name, phone, email, instagram, website, quote_cents, quote_details, rating, notes",
+        context.weddingId,
+      ),
+      rows<{ id: string; name: string }>(
+        supabase,
+        "budget_categories",
+        "id, name",
+        context.weddingId,
+      ),
+    ]);
+    return { rows: vendors.length, csv: vendorsCsv(vendors, categories) };
   },
 };
 
@@ -116,7 +156,7 @@ type FileKey = keyof typeof files;
 
 const keys = Object.keys(files) as FileKey[];
 
-export function ExportList() {
+export function ExportList(context: Context) {
   const today = useToday();
   const [busy, setBusy] = useState<FileKey | null>(null);
   const [status, setStatus] = useState("");
@@ -125,7 +165,7 @@ export function ExportList() {
     setBusy(key);
     setStatus(m.exportData.preparing);
     try {
-      const { rows, csv } = await files[key](createClient());
+      const { rows: count, csv } = await files[key](createClient(), context);
       const url = URL.createObjectURL(
         new Blob([csv], { type: "text/csv;charset=utf-8" }),
       );
@@ -134,7 +174,7 @@ export function ExportList() {
       link.download = `${m.exportData.fileNames[key]}-${today}.csv`;
       link.click();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
-      setStatus(m.exportData.done(m.exportData.files[key], rows));
+      setStatus(m.exportData.done(m.exportData.files[key], count));
     } catch {
       setStatus(m.exportData.failed);
     } finally {

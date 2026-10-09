@@ -1,19 +1,20 @@
-import { Suspense } from "react";
 import { SideNav } from "@/components/app-shell/side-nav";
 import { TabBar } from "@/components/app-shell/tab-bar";
-import { Tour } from "@/components/onboarding/tour";
-import { getFirstDay, getOnboardingDone } from "@/lib/data";
+import { m } from "@/lib/i18n";
+import { canHelp } from "@/lib/roles";
+import { requireWedding } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const [onboarded, firstDay] = await Promise.all([
-    getOnboardingDone(),
-    getFirstDay(),
-  ]);
+  const { wedding, role } = await requireWedding();
+  const canAdd = canHelp(role);
 
   return (
     <>
       <div className="flex min-h-dvh">
-        <SideNav />
+        <SideNav
+          couple={m.home.couple(wedding.partner_a, wedding.partner_b)}
+          canAdd={canAdd}
+        />
         <main
           id="conteudo"
           tabIndex={-1}
@@ -22,10 +23,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
       </div>
-      <TabBar />
-      <Suspense fallback={null}>
-        <Tour autoStart={!onboarded} hasEntries={firstDay !== null} />
-      </Suspense>
+      <TabBar canAdd={canAdd} />
     </>
   );
 }

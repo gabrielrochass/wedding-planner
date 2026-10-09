@@ -1,246 +1,343 @@
-import { CalendarCheckIcon, ReceiptTextIcon } from "lucide-react";
+import { ChevronRightIcon, PencilIcon } from "lucide-react";
+import type { Metadata, Route } from "next";
 import Link from "next/link";
-import { Balance } from "@/components/analytics/balance";
-import { CategoryDonut } from "@/components/analytics/category-donut";
-import { WhereToSave } from "@/components/analytics/insights";
-import { LimitList } from "@/components/analytics/limit-list";
-import { EmptyState } from "@/components/app-shell/empty-state";
-import { NewEntryLink } from "@/components/app-shell/new-entry-link";
 import { PageHeader } from "@/components/app-shell/page-header";
-import { SubmitButton } from "@/components/forms/submit-button";
-import { TransactionList } from "@/components/transactions/transaction-list";
+import { PaymentBadge } from "@/components/budget/payment-badge";
+import { Celebration } from "@/components/home/celebration";
+import { Countdown } from "@/components/home/countdown";
+import { Journey } from "@/components/home/journey";
+import { Milestones } from "@/components/home/milestones";
+import { ProgressRing } from "@/components/home/progress-ring";
+import { TaskBadge } from "@/components/tasks/task-badge";
+import { TaskCheck } from "@/components/tasks/task-check";
 import { buttonVariants } from "@/components/ui/button";
-import { snoozeClosing } from "@/lib/actions";
 import {
-  analysisHref,
-  canCompare,
-  categoryHref,
-  sameDayLastMonth,
-  sumThrough,
-} from "@/lib/analytics";
-import {
-  getAboveNormal,
-  getCards,
-  getCategories,
-  getCategoryTotals,
-  getClosing,
-  getDayTotals,
-  getFirstDay,
-  getRecentTransactions,
-  getSnoozedClosing,
-  getTopDescriptions,
-} from "@/lib/data";
-import {
-  addMonths,
-  formatMonthName,
-  monthRange,
-  todayInSaoPaulo,
-} from "@/lib/dates";
+  paymentState,
+  remainingBudget,
+  summarize,
+  upcomingPayments,
+} from "@/lib/budget";
+import { daysBefore, dueDate, phaseFor, taskState } from "@/lib/checklist";
+import { getBudget, getGuests, getTasks, getVendors } from "@/lib/data";
+import { formatDate, todayInSaoPaulo } from "@/lib/dates";
+import { headcount } from "@/lib/guests";
 import { m } from "@/lib/i18n";
+import { formatWholeBRL } from "@/lib/money";
+import { canEdit, canHelp } from "@/lib/roles";
+import { requireWedding } from "@/lib/supabase/server";
+import { cn } from "@/lib/utils";
+import {
+  daysUntil,
+  journey,
+  milestones,
+  overallProgress,
+  ratio,
+} from "@/lib/wedding";
+
+export const metadata: Metadata = { title: m.home.title };
+
+function Card({
+  title,
+  href,
+  more,
+  children,
+  className,
+}: {
+  title: string;
+  href: Route;
+  more: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <section
+      className={cn(
+        "flex min-w-0 flex-col gap-3 rounded-2xl bg-card p-4",
+        className,
+      )}
+    >
+      <h2 className="text-headline font-semibold">{title}</h2>
+      {children}
+      <Link
+        href={href}
+        className="-mx-1 mt-auto flex min-h-11 w-fit items-center gap-0.5 px-1 text-subhead font-medium text-link"
+      >
+        {more}
+        <ChevronRightIcon aria-hidden="true" className="size-4" />
+      </Link>
+    </section>
+  );
+}
 
 export default async function HomePage() {
+  const [{ wedding, role }, tasks, budget, vendors, { households, guests }] =
+    await Promise.all([
+      requireWedding(),
+      getTasks(),
+      getBudget(),
+      getVendors(),
+      getGuests(),
+    ]);
   const today = todayInSaoPaulo();
-  const month = today.slice(0, 7);
-  const previousMonth = addMonths(month, -1);
-  const range = monthRange(month);
-  const [
-    categories,
-    cards,
-    recent,
-    firstDay,
-    totals,
-    previousTotals,
-    byCategory,
-    unusual,
-    top,
-    previousClosing,
-    snoozed,
-  ] = await Promise.all([
-    getCategories(),
-    getCards(),
-    getRecentTransactions(today, 5),
-    getFirstDay(),
-    getDayTotals(range),
-    getDayTotals(monthRange(previousMonth)),
-    getCategoryTotals(range),
-    getAboveNormal(previousMonth),
-    getTopDescriptions(range),
-    getClosing(previousMonth),
-    getSnoozedClosing(),
-  ]);
+  const date = wedding.wedding_date;
+  const days = daysUntil(date, today);
 
-  if (recent.length === 0) {
-    return (
-      <>
-        <PageHeader title={m.nav.home} />
-        <EmptyState
-          icon={ReceiptTextIcon}
-          title={m.home.emptyTitle}
-          description={m.home.emptyDescription}
-          action={<NewEntryLink size="lg">{m.home.emptyAction}</NewEntryLink>}
-        />
-      </>
-    );
+  const done = tasks.filter((task) => task.done_at).length;
+  const open = tasks.filter((task) => !task.done_at);
+  const openByPhase: Record<string, number> = {};
+  for (const task of open) {
+    const phase = phaseFor(daysBefore(task, date));
+    openByPhase[phase] = (openByPhase[phase] ?? 0) + 1;
   }
+  const focus = open
+    .map((task) => ({ task, due: dueDate(task, date) }))
+    .toSorted((a, b) => (a.due ?? "9999").localeCompare(b.due ?? "9999"))
+    .slice(0, 3);
 
-  const monthName = formatMonthName(month);
-  const showClosingPrompt =
-    !previousClosing &&
-    snoozed !== previousMonth &&
-    firstDay !== null &&
-    firstDay < range.from;
-  const categoryById = new Map(
-    categories.map((category) => [category.id, category]),
+  const { byCategory, total } = summarize(
+    budget.categories,
+    budget.expenses,
+    budget.payments,
   );
-  const spendByCategory = new Map(
-    byCategory.map((row) => [row.category_id, row]),
+  const coveredCategories = [...byCategory.values()].filter(
+    (totals) => totals.contracted > 0,
+  ).length;
+  const remaining = remainingBudget(
+    wedding.budget_cents,
+    wedding.contingency_percent,
+    total.committed,
   );
-  const expenseRows = byCategory.flatMap((row) => {
-    const category = categoryById.get(row.category_id);
-    return category?.kind === "expense"
-      ? [{ category, cents: row.total_cents, entries: row.entries }]
-      : [];
+  const nextPayments = upcomingPayments(budget.payments, 3);
+  const expenseTitle = new Map(budget.expenses.map((e) => [e.id, e.title]));
+
+  const count = headcount(households, guests);
+  const progress = overallProgress([
+    ratio(done, tasks.length),
+    ratio(coveredCategories, budget.categories.length),
+    ratio(count.funnel.answered, count.funnel.listed),
+  ]);
+  const achievements = milestones({
+    hasDate: date !== null,
+    hiredVendors: vendors.filter((v) => v.status === "hired").length,
+    listedHouseholds: count.funnel.listed,
+    savedTheDate: count.funnel.saveTheDate,
+    invitedHouseholds: count.funnel.invited,
+    tasksDone: done,
+    tasksTotal: tasks.length,
+    confirmedGuests: count.rsvp.yes,
+    expectedGuests: count.expectedGuests,
+    committed: total.committed,
+    paid: total.paid,
   });
-  const limits = categories.flatMap((category) =>
-    category.kind === "expense" &&
-    !category.archived_at &&
-    category.monthly_limit_cents
-      ? [
-          {
-            category,
-            spent: spendByCategory.get(category.id)?.total_cents ?? 0,
-            limit: category.monthly_limit_cents,
-            href: categoryHref(category.id, month),
-          },
-        ]
-      : [],
-  );
-  limits.sort((a, b) => b.spent / b.limit - a.spent / a.limit);
 
   return (
     <>
-      <PageHeader title={m.nav.home} />
+      <PageHeader title={m.home.title} />
       <div className="flex flex-col gap-8">
-        {showClosingPrompt && (
-          <section
-            aria-labelledby="mes-terminou"
-            className="flex flex-col gap-4 rounded-2xl bg-card p-4"
-          >
-            <div className="flex items-start gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-link/12 text-link">
-                <CalendarCheckIcon aria-hidden="true" className="size-5" />
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <h2 id="mes-terminou" className="text-body font-semibold">
-                  {m.closing.ended(formatMonthName(previousMonth))}
-                </h2>
-                <p className="text-footnote text-muted-foreground">
-                  {m.closing.endedDetail}
+        <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blush via-card to-card p-5 sm:p-7">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex min-w-0 flex-col gap-3">
+              <p className="font-display text-title1 leading-tight font-bold tracking-tight text-balance sm:text-large-title">
+                {m.home.couple(wedding.partner_a, wedding.partner_b)}
+              </p>
+              {days === null ? (
+                <div className="flex flex-col items-start gap-2">
+                  <p className="text-title3 font-semibold">{m.home.noDate}</p>
+                  <p className="text-subhead text-muted-foreground">
+                    {m.home.noDateHint}
+                  </p>
+                  {canEdit(role) && (
+                    <Link
+                      href="/ajustes/casamento"
+                      className={cn(buttonVariants({ size: "lg" }), "mt-1")}
+                    >
+                      <PencilIcon aria-hidden="true" />
+                      {m.home.setDate}
+                    </Link>
+                  )}
+                </div>
+              ) : days > 0 ? (
+                <p className="flex flex-col">
+                  <span className="font-display text-[4rem] leading-none font-extrabold tracking-tighter text-link sm:text-[5rem]">
+                    <Countdown days={days} />
+                  </span>
+                  <span className="text-subhead text-muted-foreground">
+                    {m.home.daysLeft(days)}
+                    {date ? `, ${formatDate(date, today)}` : ""}
+                  </span>
                 </p>
-              </div>
+              ) : (
+                <p className="font-display text-large-title font-bold tracking-tight text-link">
+                  {days === 0 ? m.home.today : m.home.married(-days)}
+                </p>
+              )}
+              {wedding.motto && (
+                <p className="max-w-prose font-display text-body text-muted-foreground">
+                  “{wedding.motto}”
+                </p>
+              )}
             </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Link
-                href={`/balanco?mes=${previousMonth}`}
-                className={buttonVariants({ size: "lg" })}
-              >
-                {m.closing.seeReport}
-              </Link>
-              <form action={snoozeClosing.bind(null, previousMonth)}>
-                <SubmitButton variant="ghost" size="lg" className="w-full">
-                  {m.closing.later}
-                </SubmitButton>
-              </form>
+            <div className="hidden flex-col items-center gap-1 sm:flex">
+              <ProgressRing value={progress} label={m.home.progress} />
             </div>
-          </section>
-        )}
-
-        <Balance
-          title={m.balance.title(monthName)}
-          income={totals.income}
-          expenses={totals.expenses}
-          comparison={
-            canCompare(firstDay, month)
-              ? {
-                  current: sumThrough(totals.byDay, today),
-                  previous: sumThrough(
-                    previousTotals.byDay,
-                    sameDayLastMonth(today),
-                  ),
-                  reference: m.analysis.samePeriodOf(
-                    formatMonthName(previousMonth),
-                  ),
-                }
-              : null
-          }
-        />
-
-        {expenseRows.length > 0 && (
-          <section
-            aria-labelledby="para-onde-foi"
-            className="flex flex-col gap-3"
-          >
-            <div className="flex items-baseline justify-between px-1">
-              <h2 id="para-onde-foi" className="text-title3 font-semibold">
-                {m.home.whereItWent}
-              </h2>
-              <Link
-                href={analysisHref(month)}
-                className="text-subhead font-medium text-link"
-              >
-                {m.home.seeAnalysis}
-              </Link>
-            </div>
-            <CategoryDonut
-              rows={expenseRows}
-              total={totals.expenses}
-              hrefFor={(id) => categoryHref(id, month)}
-              othersHref={analysisHref(month)}
-            />
-          </section>
-        )}
-
-        {limits.length > 0 && (
-          <section aria-labelledby="limites" className="flex flex-col gap-3">
-            <h2 id="limites" className="px-1 text-title3 font-semibold">
-              {m.home.limits}
-            </h2>
-            <LimitList rows={limits} />
-          </section>
-        )}
-
-        <WhereToSave
-          categories={categories}
-          unusual={unusual}
-          unusualMonth={previousMonth}
-          top={top.slice(0, 3)}
-          topMonth={month}
-          expenseEntries={expenseRows.reduce(
-            (sum, row) => sum + row.entries,
-            0,
-          )}
-        />
-
-        <section aria-labelledby="ultimos" className="flex flex-col gap-3">
-          <div className="flex items-baseline justify-between px-1">
-            <h2 id="ultimos" className="text-title3 font-semibold">
-              {m.home.recent}
-            </h2>
-            <Link
-              href="/transacoes"
-              className="text-subhead font-medium text-link"
-            >
-              {m.home.seeAll}
-            </Link>
           </div>
-          <TransactionList
-            transactions={recent}
-            categories={categories}
-            cards={cards}
-            today={today}
-          />
+          <div className="mt-4 flex items-center gap-3 sm:hidden">
+            <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full origin-left animate-grow-x rounded-full bg-primary"
+                style={{ width: `${Math.round(progress * 100)}%` }}
+              />
+            </div>
+            <span className="text-footnote font-semibold tabular-nums">
+              {m.home.progressValue(Math.round(progress * 100))}
+            </span>
+          </div>
+          <p className="sr-only">{m.home.progressParts}</p>
         </section>
+
+        <Journey steps={journey(date, today)} open={openByPhase} />
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Card title={m.home.focus} href="/tarefas" more={m.home.focusMore}>
+            {focus.length === 0 ? (
+              <p className="text-subhead text-muted-foreground">
+                {m.home.focusEmpty}
+              </p>
+            ) : (
+              <ul className="-mx-2 flex flex-col">
+                {focus.map(({ task, due }) => (
+                  <li key={task.id} className="flex items-center gap-1">
+                    <TaskCheck
+                      id={task.id}
+                      title={task.title}
+                      done={false}
+                      disabled={!canHelp(role)}
+                    />
+                    <Link
+                      href={`/tarefas/${task.id}` as Route}
+                      className="flex min-w-0 flex-1 flex-col py-1.5"
+                    >
+                      <span className="truncate text-body">{task.title}</span>
+                      <TaskBadge
+                        state={taskState(task, date, today)}
+                        label={
+                          due
+                            ? m.tasks.dueOn(formatDate(due, today))
+                            : undefined
+                        }
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card
+            title={m.home.payments}
+            href="/orcamento"
+            more={m.home.paymentsMore}
+          >
+            {nextPayments.length === 0 ? (
+              <p className="text-subhead text-muted-foreground">
+                {m.home.paymentsEmpty}
+              </p>
+            ) : (
+              <ul className="flex flex-col divide-y">
+                {nextPayments.map((payment) => (
+                  <li key={payment.id}>
+                    <Link
+                      href={`/orcamento/gastos/${payment.expense_id}` as Route}
+                      className="flex min-h-12 items-center justify-between gap-3 py-2"
+                    >
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-body">
+                          {expenseTitle.get(payment.expense_id)}
+                        </span>
+                        <PaymentBadge
+                          state={paymentState(payment, today)}
+                          label={m.budget.dueLabel(
+                            formatDate(payment.due_on, today),
+                          )}
+                        />
+                      </span>
+                      <span className="shrink-0 text-body font-semibold tabular-nums">
+                        {formatWholeBRL(payment.amount_cents)}
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card
+            title={m.home.guestsCard}
+            href="/convidados"
+            more={m.home.guestsMore}
+          >
+            <p className="text-body">
+              {m.home.guestsSummary(count.expectedGuests, count.rsvp.yes)}
+            </p>
+            <div
+              aria-hidden="true"
+              className="flex h-2.5 overflow-hidden rounded-full bg-muted"
+            >
+              <div
+                className="h-full bg-success"
+                style={{
+                  width: `${(ratio(count.rsvp.yes, count.invitedGuests) ?? 0) * 100}%`,
+                }}
+              />
+              <div
+                className="h-full bg-danger/70"
+                style={{
+                  width: `${(ratio(count.rsvp.no, count.invitedGuests) ?? 0) * 100}%`,
+                }}
+              />
+            </div>
+          </Card>
+
+          <Card
+            title={m.home.budgetCard}
+            href="/orcamento"
+            more={m.home.paymentsMore}
+          >
+            <p className="text-body tabular-nums">
+              {wedding.budget_cents
+                ? m.home.budgetCommitted(
+                    formatWholeBRL(total.committed),
+                    formatWholeBRL(wedding.budget_cents),
+                  )
+                : m.home.budgetNoTotal(formatWholeBRL(total.committed))}
+            </p>
+            {wedding.budget_cents && (
+              <div
+                aria-hidden="true"
+                className="h-2.5 overflow-hidden rounded-full bg-muted"
+              >
+                <div
+                  className={cn(
+                    "h-full rounded-full",
+                    remaining !== null && remaining < 0
+                      ? "bg-danger"
+                      : "bg-primary",
+                  )}
+                  style={{
+                    width: `${Math.min(total.committed / wedding.budget_cents, 1) * 100}%`,
+                  }}
+                />
+              </div>
+            )}
+          </Card>
+        </div>
+
+        <Milestones items={achievements} />
       </div>
+      <Celebration
+        weddingId={wedding.id}
+        reached={achievements.filter((a) => a.reached).map((a) => a.key)}
+      />
     </>
   );
 }

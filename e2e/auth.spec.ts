@@ -9,7 +9,7 @@ const options = { auth: { persistSession: false, autoRefreshToken: false } };
 const publicPages = ["/entrar", "/cadastro", "/termos", "/privacidade"];
 
 function emailOf(alias: string) {
-  return `e2e-${alias}@financial-tracker.local`;
+  return `e2e-${alias}@simadois.local`;
 }
 
 function admin() {
@@ -21,7 +21,7 @@ function admin() {
 }
 
 function freshEmail(tag: string, testInfo: TestInfo) {
-  return `e2e-${tag}-${testInfo.project.name}-${Date.now()}@financial-tracker.local`;
+  return `e2e-${tag}-${testInfo.project.name}-${Date.now()}@simadois.local`;
 }
 
 async function createPerson(email: string) {
@@ -38,10 +38,17 @@ async function createPerson(email: string) {
   );
   await client.auth.signInWithPassword({ email, password });
   await client
-    .from("profiles")
-    .update({ onboarding_done_at: new Date().toISOString() })
-    .eq("id", data.user.id)
+    .rpc("create_wedding", {
+      p_id: crypto.randomUUID(),
+      p_partner_a: "Ana",
+      p_partner_b: "Bruno",
+      p_ceremony: "both",
+      p_tasks: [],
+      p_categories: [],
+      p_contributor: "Ana e Bruno",
+    })
     .throwOnError();
+  return data.user.id;
 }
 
 async function removePerson(email: string) {
@@ -59,7 +66,7 @@ function signIn(page: Page, alias: string, next: string) {
   return page.goto(`/dev/entrar?as=${alias}&next=${encodeURIComponent(next)}`);
 }
 
-async function seedTransactions(alias: string, count: number) {
+async function seedGuests(alias: string, count: number) {
   const client = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL as string,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY as string,
@@ -70,38 +77,33 @@ async function seedTransactions(alias: string, count: number) {
     password,
   });
   if (error) throw error;
-  const categoryId = "0e5b0000-0000-4000-8000-000000000001";
+  const { data: wedding } = await client
+    .from("weddings")
+    .select("id")
+    .single()
+    .throwOnError();
+  const households = Array.from({ length: count }, (_, index) => ({
+    id: `0e5b0000-0000-4000-8000-${String(index + 10).padStart(12, "0")}`,
+    wedding_id: wedding.id,
+    name: `Família ${index + 1}`,
+    list: "a" as const,
+  }));
   await client
-    .from("categories")
+    .from("households")
+    .upsert(households, { onConflict: "id", ignoreDuplicates: true })
+    .throwOnError();
+  await client
+    .from("guests")
     .upsert(
-      {
-        id: categoryId,
-        kind: "expense",
-        name: "Mercado",
-        icon: "shopping-cart",
-        color: "chart-3",
-      },
+      households.map((household, index) => ({
+        id: `0e5b0000-0000-4000-9000-${String(index + 10).padStart(12, "0")}`,
+        wedding_id: wedding.id,
+        household_id: household.id,
+        name: `Convidado ${index + 1}`,
+      })),
       { onConflict: "id", ignoreDuplicates: true },
     )
     .throwOnError();
-  const rows = Array.from({ length: count }, (_, index) => ({
-    id: `0e5b0000-0000-4000-8000-${String(index + 10).padStart(12, "0")}`,
-    kind: "expense",
-    amount_cents: 1000 + index,
-    occurred_on: `2026-09-${String((index % 28) + 1).padStart(2, "0")}`,
-    description: `Compra ${index + 1}`,
-    category_id: categoryId,
-    payment_kind: "pix",
-  }));
-  for (let start = 0; start < rows.length; start += 500) {
-    await client
-      .from("transactions")
-      .upsert(rows.slice(start, start + 500), {
-        onConflict: "id",
-        ignoreDuplicates: true,
-      })
-      .throwOnError();
-  }
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -121,7 +123,7 @@ test("public pages fit a 320px screen", async ({ page }) => {
   for (const path of publicPages) {
     await page.goto(path);
     const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth,
+      () => document.documentElement.scrollWidth - 320,
     );
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
@@ -141,29 +143,15 @@ async function personClient(email: string, secret: string) {
   return client;
 }
 
-async function answerAccount(page: Page, email: string, secret: string) {
-  const name = page.getByLabel("Seu nome");
-  await expect(name).toBeFocused();
-  await name.fill("Ana Souza");
-  await name.press("Enter");
-  await expect(
-    page.getByRole("heading", { name: "Prazer, Ana. Qual é o seu e-mail?" }),
-  ).toBeVisible();
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByRole("button", { name: "Continuar" }).click();
-  await page.getByLabel("Senha", { exact: true }).fill(secret);
-  await page.getByRole("button", { name: "Criar conta grátis" }).click();
-}
-
 test("a new person answers one question at a time and lands ready", async ({
   page,
 }, testInfo) => {
   const email = freshEmail("cadastro", testInfo);
   const secret = "uma frase só minha";
   try {
-    await page.goto("/entrar?next=/cofrinhos");
+    await page.goto("/entrar?next=/tarefas");
     await page.getByRole("link", { name: "Criar conta grátis" }).click();
-    await expect(page).toHaveURL("/cadastro?next=%2Fcofrinhos");
+    await expect(page).toHaveURL("/cadastro?next=%2Ftarefas");
     await expectNoAxeViolations(page);
 
     const name = page.getByLabel("Seu nome");
@@ -171,7 +159,7 @@ test("a new person answers one question at a time and lands ready", async ({
     await name.press("Enter");
     await page.getByLabel("E-mail").fill(email.toUpperCase());
     await page.getByRole("button", { name: "Continuar" }).click();
-    await expect(page.getByText("Passo 3 de 5")).toBeVisible();
+    await expect(page.getByText("Passo 3 de 3")).toBeVisible();
     await page.getByLabel("Senha", { exact: true }).fill(secret);
     await page.getByRole("button", { name: "Voltar" }).click();
     await expect(page.getByLabel("E-mail")).toHaveValue(email.toUpperCase());
@@ -185,53 +173,23 @@ test("a new person answers one question at a time and lands ready", async ({
     await expectNoAxeViolations(page);
     await page.getByRole("button", { name: "Criar conta grátis" }).click();
 
-    await expect(page).toHaveURL("/comecar?next=%2Fcofrinhos");
-    await expect(
-      page.getByRole("heading", { name: "Onde você mais gasta?" }),
-    ).toBeFocused();
-    await expect(page.getByRole("checkbox", { name: "Mercado" })).toBeChecked();
-    await page
-      .getByRole("checkbox", { name: "Lazer" })
-      .uncheck({ force: true });
-    await page.getByLabel("Outra categoria").fill("Academia");
-    await page.getByLabel("Outra categoria").press("Enter");
-    await expect(
-      page.getByRole("checkbox", { name: "Academia" }),
-    ).toBeChecked();
-    await expectNoAxeViolations(page);
+    await expect(page).toHaveURL("/comecar?next=%2Ftarefas");
+    await expect(page.getByLabel("Primeiro nome")).toHaveValue("Ana");
+    await page.getByLabel("Segundo nome").fill("Bruno");
     await page.getByRole("button", { name: "Continuar" }).click();
-
+    await page.getByRole("button", { name: "Continuar" }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
+    await page.getByRole("button", { name: "Criar nosso casamento" }).click();
     await expect(
-      page.getByRole("heading", { name: "Você usa cartão de crédito?" }),
+      page.getByRole("heading", { name: "Tudo pronto!" }),
     ).toBeVisible();
-    await page.getByRole("radio", { name: "Sim" }).check({ force: true });
-    await page.getByLabel("Nome do cartão").fill("Roxinho");
-    await page.getByRole("radio", { name: "Ametista" }).check({ force: true });
-    await expectNoAxeViolations(page);
-    await page.getByRole("button", { name: "Concluir" }).click();
-
-    await expect(page).toHaveURL("/cofrinhos");
-    await expect(
-      page.getByRole("dialog", { name: "Boas-vindas ao Contadinho" }),
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Agora não" }).click();
-    await expect(page.getByRole("dialog")).toHaveCount(0);
 
     const client = await personClient(email, secret);
-    const { data: categories } = await client
-      .from("categories")
-      .select("name")
+    const { count } = await client
+      .from("tasks")
+      .select("id", { count: "exact", head: true })
       .throwOnError();
-    const names = categories?.map((row) => row.name) ?? [];
-    expect(names).toEqual(
-      expect.arrayContaining(["Mercado", "Academia", "Salário"]),
-    );
-    expect(names).not.toContain("Lazer");
-    const { data: cards } = await client
-      .from("cards")
-      .select("name, design")
-      .throwOnError();
-    expect(cards).toEqual([{ name: "Roxinho", design: "ametista" }]);
+    expect(count).toBeGreaterThan(30);
 
     await page.goto("/ajustes/conta");
     await expect(page.getByText("Ana Souza")).toBeVisible();
@@ -240,29 +198,6 @@ test("a new person answers one question at a time and lands ready", async ({
     await fillCredentials(page, email, secret);
     await page.getByRole("button", { name: "Entrar", exact: true }).click();
     await expect(page).toHaveURL("/");
-  } finally {
-    await removePerson(email);
-  }
-});
-
-test("skipping the setup still lands in the app", async ({
-  page,
-}, testInfo) => {
-  const email = freshEmail("pular", testInfo);
-  try {
-    await page.goto("/cadastro");
-    await answerAccount(page, email, password);
-    await expect(page).toHaveURL("/comecar");
-    await page.getByRole("button", { name: "Pular" }).click();
-    await page.getByRole("radio", { name: "Não" }).check({ force: true });
-    await page.getByRole("button", { name: "Concluir" }).click();
-    await expect(page).toHaveURL("/");
-    const client = await personClient(email, password);
-    const { count } = await client
-      .from("categories")
-      .select("id", { count: "exact", head: true })
-      .throwOnError();
-    expect(count).toBe(0);
   } finally {
     await removePerson(email);
   }
@@ -416,28 +351,23 @@ test("deleting the account erases it", async ({ page }) => {
   );
 });
 
-test("exports 2.500 entries to a spreadsheet", async ({ page }) => {
+test("exports 1.200 guests to a spreadsheet", async ({ page }) => {
   await signIn(page, "exportar", "/ajustes/conta/exportar");
-  await seedTransactions("exportar", 2500);
+  await seedGuests("exportar", 1200);
   const download = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Baixar Lançamentos" }).click();
+  await page.getByRole("button", { name: "Baixar Convidados" }).click();
   const csv = await readFile(await (await download).path(), "utf8");
   expect(csv.charCodeAt(0)).toBe(0xfeff);
   const lines = csv.slice(1).trimEnd().split("\r\n");
-  expect(lines).toHaveLength(2501);
+  expect(lines).toHaveLength(1201);
   expect(lines[0]).toBe(
-    '"Data";"Tipo";"Valor";"Descrição";"Categoria";"Pagamento";"Cartão";"Vencimento da fatura";"Parcela"',
+    '"Família";"Nome";"De quem é";"Lista";"Idade";"Presença";"Acompanhante";"Restrição alimentar";"Telefone";"Endereço";"Save the date";"Convite";"Presente";"Agradecimento"',
   );
-  expect(lines[1]).toMatch(
-    /^"2026-09-01";"Despesa";"\d+,\d{2}";"Compra \d+";"Mercado";"Pix";"";"";""$/,
+  expect(lines[1]).toBe(
+    '"Família 1";"Convidado 1";"Dos dois";"Lista A";"Adulto";"Sem resposta";"";"";"";"";"";"";"";""',
   );
-  expect(lines.at(-1)).toMatch(/^"2026-09-28";/);
-  const descriptions = new Set(
-    lines.slice(1).map((line) => line.split(";")[3]),
-  );
-  expect(descriptions.size).toBe(2500);
   await expect(page.getByRole("status")).toHaveText(
-    "Lançamentos: 2.500 linhas baixadas",
+    "Convidados: 1.200 linhas baixadas",
   );
   await expectNoAxeViolations(page);
 });
@@ -446,9 +376,8 @@ test("installing works without a session", async ({ request }) => {
   const response = await request.get("/manifest.webmanifest");
   expect(response.ok()).toBe(true);
   const manifest = await response.json();
-  expect(manifest.shortcuts[0].url).toBe("/lancamentos/novo");
-  const icons = [...manifest.icons, ...manifest.shortcuts[0].icons];
-  for (const icon of icons) {
+  expect(manifest.shortcuts[0].url).toBe("/tarefas/nova");
+  for (const icon of manifest.icons) {
     expect((await request.get(icon.src)).ok(), icon.src).toBe(true);
   }
   expect((await request.get("/apple-icon.png")).ok()).toBe(true);
@@ -485,9 +414,10 @@ test("pages run under the content security policy", async ({ page }) => {
   await signIn(page, "csp", "/");
   for (const path of [
     "/",
-    "/cofrinhos",
+    "/convidados",
+    "/orcamento",
+    "/fornecedores",
     "/ajustes/conta",
-    "/lancamentos/novo",
   ]) {
     await page.goto(path);
     await page.waitForLoadState("networkidle");

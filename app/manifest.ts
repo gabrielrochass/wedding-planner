@@ -11,8 +11,8 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     scope: "/",
     display: "standalone",
-    background_color: "#f2f2f7",
-    theme_color: "#f2f2f7",
+    background_color: "#f6f3f4",
+    theme_color: "#f6f3f4",
     icons: [
       {
         src: "/icons/icon-192.png",
@@ -34,17 +34,8 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     shortcuts: [
-      {
-        name: m.app.newExpense,
-        url: "/lancamentos/novo",
-        icons: [
-          {
-            src: "/icons/novo-gasto-96.png",
-            sizes: "96x96",
-            type: "image/png",
-          },
-        ],
-      },
+      { name: m.tasks.newTask, url: "/tarefas/nova" },
+      { name: m.guests.newHousehold, url: "/convidados/nova" },
     ],
   };
 }

@@ -3,16 +3,32 @@ import { expectNoAxeViolations } from "./axe";
 
 const tabs = [
   { name: "Início", path: "/" },
-  { name: "Transações", path: "/transacoes" },
-  { name: "Cofrinhos", path: "/cofrinhos" },
-  { name: "Análises", path: "/analises" },
+  { name: "Tarefas", path: "/tarefas" },
+  { name: "Convidados", path: "/convidados" },
+  { name: "Orçamento", path: "/orcamento" },
 ];
 
-const settingsPaths = [
+const screens = [
+  "/mais",
+  "/fornecedores",
+  "/fornecedores/novo",
+  "/fornecedores/comparar",
+  "/equipe",
+  "/ideias",
+  "/ideias/nova",
+  "/musicas",
+  "/cortejo",
+  "/cronograma",
+  "/enxoval",
+  "/enxoval/colar",
+  "/tarefas/nova",
+  "/convidados/nova",
+  "/convidados/colar",
+  "/convidados/triagem",
+  "/orcamento/gastos/novo",
+  "/orcamento/categorias/nova",
   "/ajustes",
-  "/ajustes/categorias",
-  "/ajustes/cartoes",
-  "/ajustes/cartoes/novo",
+  "/ajustes/casamento",
   "/ajustes/conta",
   "/ajustes/conta/exportar",
   "/ajustes/conta/excluir",
@@ -24,7 +40,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 
     test("tab bar navigates between sections", async ({ page }) => {
       test.slow();
-      await page.goto("/");
+      await page.goto(`/dev/entrar?as=abas-${colorScheme}&next=/`);
       const nav = page.getByRole("navigation", { name: "Navegação principal" });
 
       for (const tab of tabs) {
@@ -41,29 +57,36 @@ for (const colorScheme of ["light", "dark"] as const) {
       }
     });
 
-    test("settings opens from the header", async ({ page }) => {
-      await page.goto("/");
-      await page.getByRole("link", { name: "Ajustes" }).click();
+    test("more opens vendors, team and settings", async ({ page }) => {
+      await page.goto(`/dev/entrar?as=mais-${colorScheme}&next=/`);
+      await page.getByRole("link", { name: "Mais" }).click();
       await expect(
-        page.getByRole("heading", { level: 1, name: "Ajustes" }),
+        page.getByRole("heading", { level: 1, name: "Mais" }),
       ).toBeVisible();
+      for (const name of ["Fornecedores", "Equipe", "Ajustes"]) {
+        await expect(
+          page.getByRole("main").getByRole("link", { name }),
+        ).toBeVisible();
+      }
       await expectNoAxeViolations(page);
     });
 
-    test("new entry opens full screen and goes back", async ({ page }) => {
-      await page.goto("/");
-      await page.getByRole("link", { name: "Adicionar lançamento" }).click();
-      await expect(
-        page.getByRole("heading", { level: 1, name: "Novo lançamento" }),
-      ).toBeVisible();
+    test("the add button opens a sheet with shortcuts", async ({ page }) => {
+      await page.goto(`/dev/entrar?as=adicionar-${colorScheme}&next=/`);
+      await page.getByRole("button", { name: "Adicionar" }).click();
+      const sheet = page.getByRole("dialog", { name: "Adicionar" });
+      await expect(sheet).toBeVisible();
       await expectNoAxeViolations(page);
-      await page.getByRole("button", { name: "Voltar" }).click();
-      await expect(page).toHaveURL("/");
+      await sheet.getByRole("link", { name: /Tarefa/ }).click();
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Nova tarefa" }),
+      ).toBeVisible();
     });
 
-    test("settings screens meet WCAG", async ({ page }) => {
+    test("every screen meets WCAG", async ({ page }) => {
       test.slow();
-      for (const path of settingsPaths) {
+      await page.goto(`/dev/entrar?as=telas-${colorScheme}&next=/`);
+      for (const path of screens) {
         await page.goto(path);
         await expectNoAxeViolations(page);
       }
@@ -79,14 +102,11 @@ for (const colorScheme of ["light", "dark"] as const) {
 test("no horizontal scroll at 320px", async ({ page }) => {
   test.slow();
   await page.setViewportSize({ width: 320, height: 640 });
-  for (const path of [
-    ...tabs.map((tab) => tab.path),
-    ...settingsPaths,
-    "/lancamentos/novo",
-  ]) {
+  await page.goto("/dev/entrar?as=estreito&next=/");
+  for (const path of [...tabs.map((tab) => tab.path), ...screens]) {
     await page.goto(path);
     const overflow = await page.evaluate(
-      () => document.documentElement.scrollWidth - window.innerWidth,
+      () => document.documentElement.scrollWidth - 320,
     );
     expect(overflow, path).toBeLessThanOrEqual(0);
   }

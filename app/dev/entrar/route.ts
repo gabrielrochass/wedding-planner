@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import { defaultContingency, plannedByCategory } from "@/lib/budget";
+import { starterTasks } from "@/lib/checklist";
+import { addDays, todayInSaoPaulo } from "@/lib/dates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
@@ -16,24 +19,44 @@ export async function GET(request: Request) {
   const devUser = {
     email:
       alias && /^[a-z0-9-]{1,32}$/.test(alias)
-        ? `e2e-${alias}@financial-tracker.local`
-        : (process.env.DEV_AUTH_EMAIL ?? "dev@financial-tracker.local"),
+        ? `e2e-${alias}@simadois.local`
+        : (process.env.DEV_AUTH_EMAIL ?? "dev@simadois.local"),
     password: "dev-only-local-password",
   };
 
   await createAdminClient().auth.admin.createUser({
     ...devUser,
     email_confirm: true,
-    user_metadata: { full_name: "Pessoa de teste" },
+    user_metadata: { full_name: "Ana Teste" },
   });
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword(devUser);
   if (error) throw error;
-  await supabase
-    .from("profiles")
-    .update({ onboarding_done_at: new Date().toISOString() })
-    .eq("id", data.user.id);
+
+  if (url.searchParams.get("sem-casamento") !== "1") {
+    const { count } = await supabase
+      .from("wedding_members")
+      .select("wedding_id", { count: "exact", head: true })
+      .eq("user_id", data.user.id);
+    if (!count) {
+      const budget = 8_000_000;
+      const { error: weddingError } = await supabase.rpc("create_wedding", {
+        p_id: crypto.randomUUID(),
+        p_partner_a: "Ana",
+        p_partner_b: "Bruno",
+        p_ceremony: "both",
+        p_tasks: starterTasks("both"),
+        p_categories: plannedByCategory(budget, defaultContingency),
+        p_contributor: "Ana e Bruno",
+        p_date: addDays(todayInSaoPaulo(), 500),
+        p_city: "Recife",
+        p_guest_estimate: 150,
+        p_budget_cents: budget,
+      });
+      if (weddingError) throw weddingError;
+    }
+  }
 
   const target = new URL(url.searchParams.get("next") ?? "/", url);
   return NextResponse.redirect(

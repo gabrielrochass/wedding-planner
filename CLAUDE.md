@@ -1,9 +1,11 @@
 @AGENTS.md
 
-# Contadinho
+# Sim a Dois
 
-Web app de finanças pessoais (pt-BR): registrar gastos rápido, ver custo por categoria e acompanhar cofrinhos com
-previsão de meta. SaaS público, gratuito, Next.js 16 + Supabase + Vercel (região gru1).
+Web app de planejamento de casamento (pt-BR): checklist com prazos brasileiros, orçamento com parcelas e contribuidores,
+fornecedores em funil, convidados por família com triagem e WhatsApp. SaaS público, gratuito, multi-tenant por
+casamento com papéis (couple, planner, helper, viewer). Next.js 16 + Supabase + Vercel (região gru1). Infra própria,
+sem ligação com o Contadinho, que só serviu de template.
 
 ## Comandos
 
@@ -12,6 +14,7 @@ previsão de meta. SaaS público, gratuito, Next.js 16 + Supabase + Vercel (regi
 - `npm run typecheck` — tipos de rota + `tsc`
 - `npm test` — Vitest (`lib/**/*.test.ts`)
 - `npm run test:e2e` — Playwright + axe (`e2e/`), sobe o build com `DEV_UI=1`
+- `supabase test db` — pgTAP (`supabase/tests/database/`); `npm run db:types` regenera os tipos do banco
 
 ## Princípios
 
@@ -48,5 +51,7 @@ previsão de meta. SaaS público, gratuito, Next.js 16 + Supabase + Vercel (regi
 
 ## Next.js
 
-- Server Components leem dados; Server Actions escrevem; checar autenticação dentro de cada action.
+- Server Components leem dados (`lib/data.ts`); Server Actions escrevem (`lib/actions/*`); cada action chama
+  `requireWedding()` e checa o papel com `lib/roles.ts` antes de escrever, sempre filtrando por `wedding_id`.
+- Tabelas de domínio têm `wedding_id`, RLS via `private.member_role()` e grants por coluna.
 - `proxy.ts` (não `middleware.ts`) só renova sessão e redireciona.

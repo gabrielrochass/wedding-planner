@@ -103,6 +103,12 @@ export function addMonths(month: string, delta: number) {
   return `${Math.floor(index / 12)}-${pad((index % 12) + 1)}`;
 }
 
+export function addMonthsToDate(isoDate: string, delta: number) {
+  const month = addMonths(isoDate.slice(0, 7), delta);
+  const day = Math.min(Number(isoDate.slice(8)), daysInMonth(month));
+  return `${month}-${pad(day)}`;
+}
+
 export function parseMonth(value: unknown) {
   return typeof value === "string" && /^\d{4}-(0[1-9]|1[0-2])$/.test(value)
     ? value
@@ -144,8 +150,8 @@ export function formatShortDate(isoDate: string) {
 }
 
 export function formatDayHeading(isoDate: string, today: string) {
-  if (isoDate === today) return m.transactions.today;
-  if (isoDate === addDays(today, -1)) return m.transactions.yesterday;
+  if (isoDate === today) return m.common.today;
+  if (isoDate === addDays(today, -1)) return m.common.yesterday;
   const format =
     isoDate.slice(0, 4) === today.slice(0, 4) ? dayHeading : dayHeadingWithYear;
   return format.format(toUtc(isoDate));

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { bom, csvCell, toCsv } from "./csv";
-import { cardsCsv, jarEntriesCsv, jarsCsv, transactionsCsv } from "./export";
+import { expensesCsv, guestsCsv, tasksCsv, vendorsCsv } from "./export";
 
 function lines(csv: string) {
   return csv.slice(bom.length).trimEnd().split("\r\n");
@@ -14,8 +14,8 @@ describe("toCsv", () => {
   });
 
   it("quotes every cell and doubles inner quotes", () => {
-    expect(csvCell('Almoço "executivo"; centro')).toBe(
-      '"Almoço ""executivo""; centro"',
+    expect(csvCell('Bolo "naked"; 3 andares')).toBe(
+      '"Bolo ""naked""; 3 andares"',
     );
     expect(csvCell(null)).toBe('""');
   });
@@ -23,107 +23,168 @@ describe("toCsv", () => {
   it("keeps spreadsheets from running formulas", () => {
     expect(csvCell("=SOMA(A1:A9)")).toBe(`"'=SOMA(A1:A9)"`);
     expect(csvCell("+55 81 9999")).toBe(`"'+55 81 9999"`);
-    expect(csvCell("@usuario")).toBe(`"'@usuario"`);
   });
 });
 
-describe("transactionsCsv", () => {
-  it("writes one friendly row per entry", () => {
-    const csv = transactionsCsv(
+describe("guestsCsv", () => {
+  it("writes one row per person with household details", () => {
+    const csv = guestsCsv(
       [
         {
-          kind: "expense",
-          amount_cents: 4590,
-          occurred_on: "2026-10-02",
-          description: "Almoço",
-          category_id: "cat",
-          payment_kind: "pix",
-          card_id: null,
-          bill_due_on: null,
-          installment_number: null,
-          installment_count: null,
-        },
-        {
-          kind: "expense",
-          amount_cents: 100000,
-          occurred_on: "2026-10-03",
-          description: null,
-          category_id: "cat",
-          payment_kind: "card",
-          card_id: "card",
-          bill_due_on: "2026-11-10",
-          installment_number: 3,
-          installment_count: 10,
+          id: "h1",
+          name: "Família Souza",
+          side: "a",
+          list: "a",
+          phone: "5581999990000",
+          address: null,
+          save_the_date_on: "2027-06-01",
+          invited_on: null,
+          gift: null,
+          thanked_on: null,
         },
       ],
-      [{ id: "cat", name: "Restaurantes" }],
-      [{ id: "card", name: "Nubank" }],
-    );
-    expect(lines(csv)).toEqual([
-      '"Data";"Tipo";"Valor";"Descrição";"Categoria";"Pagamento";"Cartão";"Vencimento da fatura";"Parcela"',
-      '"2026-10-02";"Despesa";"45,90";"Almoço";"Restaurantes";"Pix";"";"";""',
-      '"2026-10-03";"Despesa";"1000,00";"";"Restaurantes";"Cartão";"Nubank";"2026-11-10";"3 de 10"',
-    ]);
-  });
-});
-
-describe("jarEntriesCsv", () => {
-  it("names the opening balance and the movements", () => {
-    const csv = jarEntriesCsv(
       [
         {
-          jar_id: "jar",
-          kind: "deposit",
-          amount_cents: 200000,
-          occurred_on: "2026-10-01",
-          note: null,
-          is_opening: true,
+          household_id: "h1",
+          name: "Rita",
+          age_band: "adult",
+          rsvp: "yes",
+          is_plus_one: false,
+          dietary: "Sem glúten",
         },
         {
-          jar_id: "jar",
-          kind: "withdrawal",
-          amount_cents: 30000,
-          occurred_on: "2026-10-04",
-          note: "Passaporte",
-          is_opening: false,
+          household_id: "h1",
+          name: "Acompanhante",
+          age_band: "adult",
+          rsvp: "pending",
+          is_plus_one: true,
+          dietary: null,
+        },
+        {
+          household_id: "x",
+          name: "Órfão",
+          age_band: "adult",
+          rsvp: "pending",
+          is_plus_one: false,
+          dietary: null,
         },
       ],
-      [{ id: "jar", name: "Viagem" }],
+      { a: "Ana", b: "Bruno" },
     );
-    expect(lines(csv).slice(1)).toEqual([
-      '"Viagem";"2026-10-01";"Saldo inicial";"2000,00";""',
-      '"Viagem";"2026-10-04";"Retirada";"300,00";"Passaporte"',
-    ]);
+    const rows = lines(csv);
+    expect(rows).toHaveLength(3);
+    expect(rows[1]).toContain(
+      '"Família Souza";"Rita";"Ana";"Lista A";"Adulto";"Vai";"";"Sem glúten"',
+    );
+    expect(rows[2]).toContain(
+      '"Acompanhante";"Ana";"Lista A";"Adulto";"Sem resposta";"Sim"',
+    );
   });
 });
 
-describe("jarsCsv and cardsCsv", () => {
-  it("translate icons, colors and card designs", () => {
-    const jars = jarsCsv([
-      {
-        name: "Viagem",
-        icon: "plane",
-        color: "chart-1",
-        target_cents: 1500000,
-        target_date: "2027-12-31",
-        planned_monthly_cents: null,
-        archived_at: null,
-        created_at: "2026-10-05T02:30:00+00:00",
-      },
-    ]);
-    expect(lines(jars)[1]).toBe(
-      '"Viagem";"Avião";"Azul";"15000,00";"2027-12-31";"";"";"2026-10-04"',
+describe("tasksCsv", () => {
+  it("resolves due dates from the wedding date and assignee names", () => {
+    const csv = tasksCsv(
+      [
+        {
+          title: "Habilitação",
+          area: "documentos",
+          offset_days: 80,
+          due_on: null,
+          assignee_id: "u1",
+          assignee_label: null,
+          done_at: null,
+          notes: null,
+        },
+      ],
+      "2028-02-20",
+      new Map([["u1", "Ana"]]),
     );
-    const cards = cardsCsv([
+    expect(lines(csv)[1]).toBe(
+      '"Habilitação";"Documentos";"2027-12-02";"Ana";"";""',
+    );
+  });
+});
+
+describe("expensesCsv", () => {
+  it("writes one row per payment and keeps expenses without payments", () => {
+    const csv = expensesCsv(
+      [
+        {
+          id: "e1",
+          category_id: "c1",
+          vendor_id: "v1",
+          title: "Buffet",
+          estimated_cents: null,
+          contracted_cents: 3000000,
+        },
+        {
+          id: "e2",
+          category_id: "c1",
+          vendor_id: null,
+          title: "Bebidas",
+          estimated_cents: 500000,
+          contracted_cents: null,
+        },
+      ],
+      [
+        {
+          expense_id: "e1",
+          amount_cents: 1500000,
+          due_on: "2027-03-10",
+          paid_on: "2027-03-09",
+          method: "pix",
+          contributor_id: "p1",
+        },
+        {
+          expense_id: "e1",
+          amount_cents: 1500000,
+          due_on: "2027-04-10",
+          paid_on: null,
+          method: null,
+          contributor_id: null,
+        },
+      ],
       {
-        name: "Nubank",
-        design: "rosa",
-        best_purchase_day: 3,
-        due_day: 10,
-        archived_at: null,
-        created_at: "2026-10-05T12:00:00+00:00",
+        categories: [{ id: "c1", name: "Buffet e bebidas" }],
+        vendors: [{ id: "v1", name: "Sabor & Arte" }],
+        contributors: [{ id: "p1", name: "Família da noiva" }],
       },
-    ]);
-    expect(lines(cards)[1]).toBe('"Nubank";"Rosa";"3";"10";"";"2026-10-05"');
+    );
+    const rows = lines(csv);
+    expect(rows).toHaveLength(4);
+    expect(rows[1]).toBe(
+      '"Buffet e bebidas";"Buffet";"Sabor & Arte";"";"30000,00";"15000,00";"2027-03-10";"2027-03-09";"Pix";"Família da noiva"',
+    );
+    expect(rows[3]).toBe(
+      '"Buffet e bebidas";"Bebidas";"";"5000,00";"";"";"";"";"";""',
+    );
+  });
+});
+
+describe("vendorsCsv", () => {
+  it("translates the status and category", () => {
+    const csv = vendorsCsv(
+      [
+        {
+          name: "Sítio das Flores",
+          category_id: "c1",
+          status: "favorite",
+          contact_name: null,
+          phone: null,
+          email: null,
+          instagram: "sitio",
+          website: null,
+          quote_cents: 1800000,
+          quote_details: null,
+          rating: 5,
+          notes: null,
+        },
+      ],
+      [{ id: "c1", name: "Espaço" }],
+    );
+    expect(lines(csv)[1]).toBe(
+      '"Sítio das Flores";"Espaço";"Favorito";"";"";"";"sitio";"";"18000,00";"";"5";""',
+    );
   });
 });

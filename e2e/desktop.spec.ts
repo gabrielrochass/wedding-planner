@@ -3,12 +3,20 @@ import { expectNoAxeViolations } from "./axe";
 
 const appPaths = [
   "/",
-  "/transacoes",
-  "/cofrinhos",
-  "/analises",
+  "/tarefas",
+  "/convidados",
+  "/orcamento",
+  "/fornecedores",
+  "/fornecedores/comparar",
+  "/equipe",
+  "/ideias",
+  "/musicas",
+  "/cortejo",
+  "/cronograma",
+  "/enxoval",
   "/ajustes",
+  "/ajustes/casamento",
   "/ajustes/conta",
-  "/lancamentos/novo",
 ];
 
 for (const colorScheme of ["light", "dark"] as const) {
