@@ -12,39 +12,65 @@ import {
 import { defaultContingency, plannedByCategory } from "@/lib/budget";
 import { starterTasks } from "@/lib/checklist";
 import { m } from "@/lib/i18n";
-import { canEdit, canManageTeam, roles } from "@/lib/roles";
+import { heardFrom } from "@/lib/onboarding";
+import { canEdit, canManageTeam, type Role, roles } from "@/lib/roles";
 import {
   fieldErrors,
-  type WeddingInput,
+  type OnboardingInput,
+  onboardingInput,
   type WeddingSettingsInput,
-  weddingInput,
   weddingSettingsInput,
 } from "@/lib/schemas";
 import { requireUser, requireWedding } from "@/lib/supabase/server";
 
 export async function createWedding(
-  input: WeddingInput,
-): Promise<ActionResult & { tasks?: number }> {
-  const parsed = weddingInput.safeParse(input);
+  input: OnboardingInput,
+): Promise<ActionResult & { tasks?: number; done?: number }> {
+  const parsed = onboardingInput.safeParse(input);
   if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
   const w = parsed.data;
   const { supabase } = await requireUser();
-  const tasks = starterTasks(w.ceremony);
+  const tasks = starterTasks(w.ceremony, {
+    booked: w.booked,
+    hasDate: w.weddingDate !== null && !w.dateIsEstimate,
+  });
   const { error } = await supabase.rpc("create_wedding", {
     p_id: w.id,
     p_partner_a: w.partnerA,
     p_partner_b: w.partnerB,
     p_date: w.weddingDate ?? undefined,
+    p_date_is_estimate: w.dateIsEstimate,
     p_city: w.city ?? undefined,
     p_ceremony: w.ceremony,
     p_guest_estimate: w.guestEstimate ?? undefined,
     p_budget_cents: w.budgetCents ?? undefined,
     p_tasks: tasks,
-    p_categories: plannedByCategory(w.budgetCents, defaultContingency),
-    p_contributor: m.home.couple(w.partnerA, w.partnerB).slice(0, 40).trim(),
+    p_categories: plannedByCategory(
+      w.budgetCents,
+      defaultContingency,
+      w.priorities,
+    ),
+    p_priorities: w.priorities,
+    p_planning_as: w.persona,
   });
   if (error) return failureFor(error);
-  return { ok: true, tasks: tasks.length };
+  return {
+    ok: true,
+    tasks: tasks.length,
+    done: tasks.filter((task) => task.done).length,
+  };
+}
+
+export async function saveHeardFrom(source: string): Promise<ActionResult> {
+  const parsed = z.enum(heardFrom).safeParse(source);
+  if (!parsed.success) return failure;
+  const { supabase, userId } = await requireUser();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ heard_from: parsed.data })
+    .eq("id", userId);
+  if (error) return failureFor(error);
+  return { ok: true };
 }
 
 export async function saveWedding(
@@ -61,6 +87,7 @@ export async function saveWedding(
       partner_a: w.partnerA,
       partner_b: w.partnerB,
       wedding_date: w.weddingDate,
+      date_is_estimate: w.weddingDate !== null && w.dateIsEstimate,
       city: w.city,
       ceremony: w.ceremony,
       guest_estimate: w.guestEstimate,
@@ -110,20 +137,31 @@ export async function switchWedding(id: string) {
   redirect("/");
 }
 
-export async function createInviteLink(
-  role: string,
-): Promise<{ ok: true; token: string } | { ok: false; message: string }> {
-  const parsed = z.enum(roles).safeParse(role);
-  if (!parsed.success) return failure;
+type InviteResult =
+  | { ok: true; token: string }
+  | { ok: false; message: string };
+
+async function issueInvite(role: Role): Promise<InviteResult> {
   const { supabase, wedding, role: mine } = await requireWedding();
   if (!canManageTeam(mine)) return forbidden;
   const { data, error } = await supabase.rpc("create_invite", {
     p_wedding: wedding.id,
-    p_role: parsed.data,
+    p_role: role,
   });
   if (error || !data) return failure;
-  refresh();
   return { ok: true, token: data };
+}
+
+export async function createInviteLink(role: string): Promise<InviteResult> {
+  const parsed = z.enum(roles).safeParse(role);
+  if (!parsed.success) return failure;
+  const result = await issueInvite(parsed.data);
+  if (result.ok) refresh();
+  return result;
+}
+
+export async function invitePartner(): Promise<InviteResult> {
+  return issueInvite("couple");
 }
 
 export async function revokeInvite(id: string): Promise<ActionResult> {

@@ -7,7 +7,7 @@ insert into auth.users (id, email, raw_user_meta_data) values
 
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "11111111-1111-4111-8111-111111111111", "role": "authenticated"}';
-select public.create_wedding('aaaaaaaa-0000-4000-8000-000000000001', 'Ana', 'Bruno', 'both', '[]', '[]', 'Nós dois');
+select public.create_wedding('aaaaaaaa-0000-4000-8000-000000000001', 'Ana', 'Bruno', 'both', '[]', '[]');
 
 select lives_ok(
   $$ insert into public.ideas (wedding_id, board, title, url, status, estimate_cents) values

@@ -95,6 +95,7 @@ export const m = {
       n === 1
         ? "Casados há 1 dia"
         : `Casados há ${n.toLocaleString("pt-BR")} dias`,
+    estimated: (month: string) => `previsto para ${month}`,
     noDate: "Sem data ainda",
     noDateHint:
       "Definam a data para ver a contagem e os prazos de cada tarefa.",
@@ -103,10 +104,23 @@ export const m = {
     progressValue: (percent: number) => `${percent}% pronto`,
     progressParts:
       "Calculado com tarefas feitas, fornecedores contratados e convidados que responderam.",
-    journey: "Jornada até o altar",
-    journeyCurrent: "Vocês estão aqui",
-    journeyPending: (n: number) =>
-      plural(n, "tarefa aberta", "tarefas abertas"),
+    phase: "Fase atual",
+    phaseTasks: (done: number, total: number) =>
+      `${done} de ${plural(total, "tarefa feita", "tarefas feitas")}`,
+    phaseEmpty: "Nenhuma tarefa nesta fase.",
+    phaseBehind: (n: number) =>
+      n === 1
+        ? "1 tarefa de fases anteriores ainda aberta"
+        : `${n} tarefas de fases anteriores ainda abertas`,
+    phaseNext: (label: string, days: number) =>
+      `Próxima: ${label.toLowerCase()}, ${
+        days >= 60
+          ? `em ${Math.round(days / 30)} meses`
+          : days === 1
+            ? "amanhã"
+            : `em ${days} dias`
+      }`,
+    phaseMore: "Ver tarefas da fase",
     focus: "Foco da semana",
     focusEmpty: "Nada urgente. Aproveitem!",
     focusMore: "Ver todas as tarefas",
@@ -146,16 +160,6 @@ export const m = {
     day: "O grande dia",
     after: "Depois do casamento",
     undated: "Sem prazo",
-  },
-  journeyShort: {
-    "12m": "12 meses",
-    "9m": "9 meses",
-    "6m": "6 meses",
-    "3m": "3 meses",
-    "1m": "1 mês",
-    weeks: "Semanas",
-    day: "O dia",
-    after: "Depois",
   },
   tasks: {
     title: "Tarefas",
@@ -271,7 +275,6 @@ export const m = {
     dueOn: "Vencimento",
     paidOn: "Pago em",
     method: "Forma de pagamento",
-    paidBy: "Quem pagou",
     note: "Observação",
     markPaid: (label: string) => `Marcar como pago: ${label}`,
     markUnpaid: (label: string) => `Desmarcar pagamento: ${label}`,
@@ -288,16 +291,6 @@ export const m = {
     paidLabel: (date: string) => `Pago ${date}`,
     procon:
       "Dica do Procon: deixem uma parcela para depois da entrega do serviço.",
-    contributors: "Quem ajuda a pagar",
-    contributorsHint: "Prometido e já pago por cada pessoa ou família.",
-    newContributor: "Adicionar pessoa ou família",
-    contributorName: "Nome",
-    contributorPlaceholder: "Ex.: Família da noiva",
-    promised: "Prometido",
-    contributorPaid: (paid: string, promised: string) =>
-      `${paid} pagos de ${promised}`,
-    contributorPaidOnly: (paid: string) => `${paid} pagos`,
-    contributorSaved: "Salvo",
     donutSummary: (name: string, percent: number) =>
       `Gráfico dos gastos por categoria. A maior é ${name}, com ${percent}% do comprometido.`,
     emptyTitle: "Nada no orçamento ainda",
@@ -813,6 +806,7 @@ ${lines}`,
     partnerPlaceholder: "Ex.: Ana",
     date: "Data do casamento",
     noDate: "Ainda não sabemos",
+    dateIsEstimate: "Ainda é uma previsão, o dia pode mudar",
     city: "Cidade",
     cityPlaceholder: "Ex.: Recife",
     ceremony: "Cerimônia",
@@ -837,22 +831,108 @@ ${lines}`,
     step: (current: number, total: number) => `Passo ${current} de ${total}`,
     back: "Voltar",
     next: "Continuar",
+    skip: "Pular",
+    personaLegend: "Você é",
+    personas: {
+      couple: "Quem vai casar",
+      planner: "Assessoria ou cerimonial",
+      family: "Família ou amigo",
+    },
     namesQuestion: "Quem vai casar?",
     namesHint:
       "Os nomes aparecem no Início e nas mensagens para os convidados.",
     dateQuestion: "Quando é o grande dia?",
     dateHint: "Com a data, cada tarefa ganha um prazo. Dá para mudar depois.",
+    dateModeLegend: "Já tem data?",
+    dateModes: {
+      exact: "Já temos o dia",
+      month: "Só o mês",
+      unknown: "Ainda não",
+    },
+    month: "Mês previsto",
+    monthHint:
+      "Os prazos contam a partir do dia 1º. Quando fecharem o dia, é só trocar nos ajustes.",
+    unknownHint:
+      "Sem problema. As tarefas ficam sem prazo até vocês escolherem a data.",
     ceremonyQuestion: "Como vai ser a cerimônia?",
     ceremonyHint:
       "Ajustamos o checklist com os prazos do cartório e da igreja.",
     sizeQuestion: "Pensando no tamanho",
     sizeHint:
       "Valores aproximados ajudam a montar o orçamento por categoria. Tudo é opcional.",
+    guestPreset: (n: number) =>
+      n <= 50 ? `Até ${n}` : n >= 300 ? `${n} ou mais` : `Uns ${n}`,
+    otherGuests: "Ou digite o número",
+    budgetPreset: (cents: number, last: boolean) => {
+      const value = `R$ ${(cents / 100_000).toLocaleString("pt-BR")} mil`;
+      return cents <= 3_000_000
+        ? `Até ${value}`
+        : last
+          ? `${value} ou mais`
+          : `Uns ${value}`;
+    },
+    otherBudget: "Ou digite o valor",
+    bookedQuestion: "O que vocês já garantiram?",
+    bookedHint:
+      "Marcamos essas tarefas como feitas. Se ainda não fecharam nada, é só seguir.",
+    bookedLegend: "Já garantido",
+    bookings: {
+      espaco: "Espaço da festa",
+      cerimonia: "Igreja ou local da cerimônia",
+      assessoria: "Assessoria",
+      buffet: "Buffet",
+      fotos: "Foto e vídeo",
+      musica: "Banda ou DJ",
+      decoracao: "Decoração e flores",
+      doces: "Bolo e doces",
+      traje: "Vestido ou traje",
+      aliancas: "Alianças",
+      beleza: "Cabelo e maquiagem",
+      "lua-de-mel": "Lua de mel",
+    },
+    prioritiesQuestion: "O que não pode faltar?",
+    prioritiesHint:
+      "Damos mais espaço a isso no orçamento sugerido. Dá para ajustar tudo depois.",
+    prioritiesLegend: (n: number) => `Escolham até 3. ${n} de 3`,
+    priorities: {
+      espaco: "Um lugar lindo",
+      comida: "Comida e bebida",
+      fotos: "Fotos e vídeo",
+      decoracao: "Decoração",
+      musica: "Festa e música",
+      traje: "Vestido e traje",
+      doces: "Bolo e doces",
+      "lua-de-mel": "Lua de mel",
+    },
     finish: "Criar nosso casamento",
     finishing: "Preparando tudo…",
+    inviteQuestion: (name: string) => `Agora chame ${name}`,
+    inviteCoupleQuestion: "Agora chame o casal",
+    inviteHint:
+      "Com o link, vocês planejam juntos e veem tudo em tempo real. Ele vale por 14 dias e serve para uma pessoa.",
+    inviteCoupleHint:
+      "Cada link serve para uma pessoa. Depois vocês criam outros em Equipe.",
+    partnerMessage: (name: string, url: string) =>
+      `${name}, criei o nosso casamento no Dois em Um. Entra aqui para a gente planejar junto: ${url}`,
+    coupleMessage: (url: string) =>
+      `Criei o planejamento do casamento de vocês no Dois em Um. Entrem por aqui: ${url}`,
+    inviteLater: "Depois eu chamo",
+    inviteFailed:
+      "Não deu para criar o link agora. Dá para convidar depois em Equipe.",
     ready: "Tudo pronto!",
-    readyHint: (tasks: number) =>
-      `Montamos um checklist com ${tasks} tarefas e o orçamento por categoria. Agora é com vocês.`,
+    readyHint: (tasks: number, done: number) =>
+      done > 0
+        ? `Montamos um checklist com ${tasks} tarefas, ${done} já feitas, e o orçamento por categoria. Agora é com vocês.`
+        : `Montamos um checklist com ${tasks} tarefas e o orçamento por categoria. Agora é com vocês.`,
+    heardLegend: "Uma última, se quiser: como conheceu o Dois em Um?",
+    heard: {
+      instagram: "Instagram",
+      tiktok: "TikTok",
+      google: "Google",
+      friends: "Indicação",
+      vendor: "Fornecedor ou assessoria",
+      other: "Outro jeito",
+    },
     haveInvite: "Recebeu um convite? Abra o link que mandaram para você.",
   },
   auth: {
@@ -860,7 +940,7 @@ ${lines}`,
     tagline: "Planejem juntos, do sim à casa nova.",
     points: [
       "Checklist com os prazos do cartório e da igreja.",
-      "Orçamento com parcelas e quem ajuda a pagar.",
+      "Orçamento com parcelas e vencimentos.",
       "Convidados por família, com WhatsApp a um toque.",
     ],
     signUpTitle: "Criar conta",
@@ -1014,7 +1094,6 @@ ${lines}`,
       dueOn: "Vencimento",
       paidOn: "Pago em",
       method: "Forma de pagamento",
-      paidBy: "Quem pagou",
       status: "Etapa",
       contact: "Contato",
       email: "E-mail",

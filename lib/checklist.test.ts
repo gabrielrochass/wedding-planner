@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bookings,
   currentPhase,
   daysBefore,
   dueDate,
@@ -36,6 +37,32 @@ describe("starterTasks", () => {
     expect(
       starterTasks("both").some((t) => t.template_key === "registro-civil"),
     ).toBe(false);
+  });
+
+  it("starts with nothing done", () => {
+    expect(starterTasks("both").some((t) => t.done)).toBe(false);
+  });
+
+  it("checks off what the couple already booked and the date when it is set", () => {
+    const done = starterTasks("both", {
+      booked: ["espaco", "fotos"],
+      hasDate: true,
+    })
+      .filter((t) => t.done)
+      .map((t) => t.title);
+    expect(done).toEqual([
+      "Escolher a data e o estilo do casamento",
+      "Pesquisar e visitar espaços",
+      "Contratar o espaço da festa",
+      "Contratar fotografia e filmagem",
+    ]);
+  });
+
+  it("has a task for every booking", () => {
+    const settled = starterTasks("both", { booked: bookings }).filter(
+      (t) => t.done,
+    );
+    expect(settled.length).toBeGreaterThanOrEqual(bookings.length);
   });
 
   it("never uses dashes or middle dots in titles and notes", () => {

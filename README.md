@@ -1,7 +1,7 @@
 # Dois em Um
 
 Planejamento de casamento em pt-BR, feito para o casal planejar a dois: checklist com os prazos do cartório e da
-igreja, orçamento com parcelas e quem ajuda a pagar, fornecedores em funil com comparação lado a lado e convidados
+igreja, orçamento com parcelas e vencimentos, fornecedores em funil com comparação lado a lado e convidados
 por família, com triagem e WhatsApp a um toque. Grátis, sem anúncios e sem venda de contatos para fornecedores.
 
 Cada casamento tem uma equipe com papéis: casal (tudo), assessoria (edita tudo, menos a equipe), ajudante (edita

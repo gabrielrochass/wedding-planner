@@ -21,7 +21,9 @@ export const getMemberships = cache(async () => {
   const { supabase, userId } = await requireUser();
   const { data, error } = await supabase
     .from("wedding_members")
-    .select("role, wedding:weddings(id, partner_a, partner_b, wedding_date)")
+    .select(
+      "role, wedding:weddings(id, partner_a, partner_b, wedding_date, date_is_estimate)",
+    )
     .eq("user_id", userId)
     .order("created_at");
   if (error) throw error;
@@ -73,7 +75,7 @@ export async function getTask(id: string) {
 
 export const getBudget = cache(async () => {
   const { supabase, wedding } = await requireWedding();
-  const [categories, expenses, payments, contributors] = await Promise.all([
+  const [categories, expenses, payments] = await Promise.all([
     supabase
       .from("budget_categories")
       .select("id, name, icon, planned_cents, sort_order")
@@ -90,26 +92,19 @@ export const getBudget = cache(async () => {
     supabase
       .from("payments")
       .select(
-        "id, expense_id, amount_cents, due_on, paid_on, method, contributor_id, installment_number, installment_count, note",
+        "id, expense_id, amount_cents, due_on, paid_on, method, installment_number, installment_count, note",
       )
       .eq("wedding_id", wedding.id)
       .order("due_on")
       .order("installment_number"),
-    supabase
-      .from("contributors")
-      .select("id, name, promised_cents")
-      .eq("wedding_id", wedding.id)
-      .order("sort_order")
-      .order("created_at"),
   ]);
-  for (const result of [categories, expenses, payments, contributors]) {
+  for (const result of [categories, expenses, payments]) {
     if (result.error) throw result.error;
   }
   return {
     categories: categories.data ?? [],
     expenses: expenses.data ?? [],
     payments: payments.data ?? [],
-    contributors: contributors.data ?? [],
   };
 });
 
@@ -117,7 +112,6 @@ export type Budget = Awaited<ReturnType<typeof getBudget>>;
 export type BudgetCategory = Budget["categories"][number];
 export type Expense = Budget["expenses"][number];
 export type Payment = Budget["payments"][number];
-export type Contributor = Budget["contributors"][number];
 
 const vendorColumns =
   "id, category_id, name, status, contact_name, phone, email, instagram, website, quote_cents, quote_details, capacity, rating, visit_on, notes";

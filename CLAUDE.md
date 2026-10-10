@@ -2,7 +2,7 @@
 
 # Dois em Um
 
-Web app de planejamento de casamento (pt-BR): checklist com prazos brasileiros, orçamento com parcelas e contribuidores,
+Web app de planejamento de casamento (pt-BR): checklist com prazos brasileiros, orçamento com parcelas e vencimentos,
 fornecedores em funil, convidados por família com triagem e WhatsApp. SaaS público, gratuito, multi-tenant por
 casamento com papéis (couple, planner, helper, viewer). Next.js 16 + Supabase + Vercel (região gru1). Infra própria,
 sem ligação com o Contadinho, que só serviu de template.

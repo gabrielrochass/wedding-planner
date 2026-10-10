@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  contributorTotals,
   monthlySaving,
   paymentState,
   perGuest,
@@ -25,6 +24,21 @@ describe("starterCategories", () => {
       plannedByCategory(null, 10).every((c) => c.planned_cents === null),
     ).toBe(true);
   });
+
+  it("gives more room to what the couple cares about without changing the total", () => {
+    const plain = plannedByCategory(8_765_432, 10);
+    const photos = plannedByCategory(8_765_432, 10, ["fotos", "lua-de-mel"]);
+    const total = (list: typeof plain) =>
+      list.reduce((sum, c) => sum + (c.planned_cents ?? 0), 0);
+    const of = (list: typeof plain, name: string) =>
+      list.find((c) => c.name === name)?.planned_cents ?? 0;
+    expect(total(photos)).toBe(total(plain));
+    expect(of(photos, "Foto e vídeo")).toBeGreaterThan(
+      of(plain, "Foto e vídeo"),
+    );
+    expect(of(photos, "Lua de mel")).toBeGreaterThan(of(plain, "Lua de mel"));
+    expect(of(photos, "Espaço")).toBeLessThan(of(plain, "Espaço"));
+  });
 });
 
 const expenses = [
@@ -48,7 +62,6 @@ const payments = [
     amount_cents: 600_000,
     due_on: "2027-03-10",
     paid_on: "2027-03-10",
-    contributor_id: "f1",
   },
   {
     id: "p2",
@@ -56,7 +69,6 @@ const payments = [
     amount_cents: 600_000,
     due_on: "2027-04-10",
     paid_on: null,
-    contributor_id: null,
   },
   {
     id: "p3",
@@ -64,7 +76,6 @@ const payments = [
     amount_cents: 600_000,
     due_on: "2027-02-10",
     paid_on: null,
-    contributor_id: null,
   },
 ];
 
@@ -154,21 +165,6 @@ describe("payments", () => {
     expect(upcomingPayments(payments, 5).map((p) => p.id)).toEqual([
       "p3",
       "p2",
-    ]);
-  });
-
-  it("totals what each family paid", () => {
-    expect(
-      contributorTotals(
-        [
-          { id: "f1", promised_cents: 1_000_000 },
-          { id: "f2", promised_cents: null },
-        ],
-        payments,
-      ),
-    ).toEqual([
-      { id: "f1", promised: 1_000_000, paid: 600_000 },
-      { id: "f2", promised: null, paid: 0 },
     ]);
   });
 });

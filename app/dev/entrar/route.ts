@@ -48,7 +48,6 @@ export async function GET(request: Request) {
         p_ceremony: "both",
         p_tasks: starterTasks("both"),
         p_categories: plannedByCategory(budget, defaultContingency),
-        p_contributor: "Ana e Bruno",
         p_date: addDays(todayInSaoPaulo(), 500),
         p_city: "Recife",
         p_guest_estimate: 150,

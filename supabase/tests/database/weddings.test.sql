@@ -18,7 +18,7 @@ select is(
     '[{"title": "Contratar o espaço", "area": "fornecedores", "offset_days": 330, "notes": null, "template_key": null},
       {"title": "Dar entrada na habilitação", "area": "documentos", "offset_days": 80, "notes": "Vale 90 dias", "template_key": "habilitacao"}]',
     '[{"name": "Espaço", "icon": "building", "planned_cents": 1500000}, {"name": "Buffet", "icon": "utensils", "planned_cents": 3000000}]',
-    'Nós dois', p_date => '2028-02-20', p_city => 'Recife', p_guest_estimate => 150, p_budget_cents => 8000000),
+    p_date => '2028-02-20', p_city => 'Recife', p_guest_estimate => 150, p_budget_cents => 8000000),
   'aaaaaaaa-0000-4000-8000-000000000001'::uuid,
   'the couple creates a wedding'
 );
@@ -28,7 +28,7 @@ select is((select string_agg(name, ',' order by sort_order) from public.budget_c
 select is((select current_wedding_id from public.profiles where id = '11111111-1111-4111-8111-111111111111'),
   'aaaaaaaa-0000-4000-8000-000000000001'::uuid, 'the new wedding becomes the current one');
 select is(
-  public.create_wedding('aaaaaaaa-0000-4000-8000-000000000001', 'Ana', 'Bruno', 'both', '[]', '[]', 'Nós dois'),
+  public.create_wedding('aaaaaaaa-0000-4000-8000-000000000001', 'Ana', 'Bruno', 'both', '[]', '[]'),
   'aaaaaaaa-0000-4000-8000-000000000001'::uuid,
   'creating the same wedding again is a no-op'
 );

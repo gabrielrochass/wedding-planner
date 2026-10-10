@@ -72,41 +72,6 @@ export type Database = {
           },
         ]
       }
-      contributors: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-          promised_cents: number | null
-          sort_order: number
-          wedding_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-          promised_cents?: number | null
-          sort_order?: number
-          wedding_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-          promised_cents?: number | null
-          sort_order?: number
-          wedding_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "contributors_wedding_id_fkey"
-            columns: ["wedding_id"]
-            isOneToOne: false
-            referencedRelation: "weddings"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       expenses: {
         Row: {
           category_id: string
@@ -497,7 +462,6 @@ export type Database = {
       payments: {
         Row: {
           amount_cents: number
-          contributor_id: string | null
           created_at: string
           due_on: string
           expense_id: string
@@ -513,7 +477,6 @@ export type Database = {
         }
         Insert: {
           amount_cents: number
-          contributor_id?: string | null
           created_at?: string
           due_on: string
           expense_id: string
@@ -529,7 +492,6 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
-          contributor_id?: string | null
           created_at?: string
           due_on?: string
           expense_id?: string
@@ -544,13 +506,6 @@ export type Database = {
           wedding_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "payments_contributor_id_wedding_id_fkey"
-            columns: ["contributor_id", "wedding_id"]
-            isOneToOne: false
-            referencedRelation: "contributors"
-            referencedColumns: ["id", "wedding_id"]
-          },
           {
             foreignKeyName: "payments_expense_id_wedding_id_fkey"
             columns: ["expense_id", "wedding_id"]
@@ -572,19 +527,25 @@ export type Database = {
           created_at: string
           current_wedding_id: string | null
           display_name: string | null
+          heard_from: string | null
           id: string
+          planning_as: string | null
         }
         Insert: {
           created_at?: string
           current_wedding_id?: string | null
           display_name?: string | null
+          heard_from?: string | null
           id: string
+          planning_as?: string | null
         }
         Update: {
           created_at?: string
           current_wedding_id?: string | null
           display_name?: string | null
+          heard_from?: string | null
           id?: string
+          planning_as?: string | null
         }
         Relationships: [
           {
@@ -934,11 +895,13 @@ export type Database = {
           contingency_percent: number
           created_at: string
           created_by: string | null
+          date_is_estimate: boolean
           guest_estimate: number | null
           id: string
           motto: string | null
           partner_a: string
           partner_b: string
+          priorities: string[]
           wedding_date: string | null
         }
         Insert: {
@@ -948,11 +911,13 @@ export type Database = {
           contingency_percent?: number
           created_at?: string
           created_by?: string | null
+          date_is_estimate?: boolean
           guest_estimate?: number | null
           id?: string
           motto?: string | null
           partner_a: string
           partner_b: string
+          priorities?: string[]
           wedding_date?: string | null
         }
         Update: {
@@ -962,11 +927,13 @@ export type Database = {
           contingency_percent?: number
           created_at?: string
           created_by?: string | null
+          date_is_estimate?: boolean
           guest_estimate?: number | null
           id?: string
           motto?: string | null
           partner_a?: string
           partner_b?: string
+          priorities?: string[]
           wedding_date?: string | null
         }
         Relationships: []
@@ -990,12 +957,14 @@ export type Database = {
           p_categories: Json
           p_ceremony: Database["public"]["Enums"]["ceremony_kind"]
           p_city?: string
-          p_contributor: string
           p_date?: string
+          p_date_is_estimate?: boolean
           p_guest_estimate?: number
           p_id: string
           p_partner_a: string
           p_partner_b: string
+          p_planning_as?: string
+          p_priorities?: string[]
           p_tasks: Json
         }
         Returns: string

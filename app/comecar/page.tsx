@@ -6,9 +6,9 @@ import { WeddingSetup } from "@/components/onboarding/wedding-setup";
 import { switchWedding } from "@/lib/actions/wedding";
 import { safeNext } from "@/lib/auth-paths";
 import { getMemberships } from "@/lib/data";
-import { formatFullDate } from "@/lib/dates";
 import { m } from "@/lib/i18n";
 import { requireUser } from "@/lib/supabase/server";
+import { weddingDateLabel } from "@/lib/wedding";
 
 export const metadata: Metadata = { title: m.onboarding.namesQuestion };
 
@@ -66,7 +66,7 @@ export default async function SetupPage({
                         <span className="text-footnote text-muted-foreground">
                           {m.roles[wedding.role]}
                           {wedding.wedding_date
-                            ? `, ${formatFullDate(wedding.wedding_date)}`
+                            ? `, ${weddingDateLabel(wedding.wedding_date, wedding.date_is_estimate)}`
                             : ""}
                         </span>
                       </span>

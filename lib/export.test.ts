@@ -134,7 +134,6 @@ describe("expensesCsv", () => {
           due_on: "2027-03-10",
           paid_on: "2027-03-09",
           method: "pix",
-          contributor_id: "p1",
         },
         {
           expense_id: "e1",
@@ -142,22 +141,20 @@ describe("expensesCsv", () => {
           due_on: "2027-04-10",
           paid_on: null,
           method: null,
-          contributor_id: null,
         },
       ],
       {
         categories: [{ id: "c1", name: "Buffet e bebidas" }],
         vendors: [{ id: "v1", name: "Sabor & Arte" }],
-        contributors: [{ id: "p1", name: "Família da noiva" }],
       },
     );
     const rows = lines(csv);
     expect(rows).toHaveLength(4);
     expect(rows[1]).toBe(
-      '"Buffet e bebidas";"Buffet";"Sabor & Arte";"";"30000,00";"15000,00";"2027-03-10";"2027-03-09";"Pix";"Família da noiva"',
+      '"Buffet e bebidas";"Buffet";"Sabor & Arte";"";"30000,00";"15000,00";"2027-03-10";"2027-03-09";"Pix"',
     );
     expect(rows[3]).toBe(
-      '"Buffet e bebidas";"Bebidas";"";"5000,00";"";"";"";"";"";""',
+      '"Buffet e bebidas";"Bebidas";"";"5000,00";"";"";"";"";""',
     );
   });
 });

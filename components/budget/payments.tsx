@@ -19,7 +19,7 @@ import {
 } from "@/lib/actions/budget";
 import { attempt, failed } from "@/lib/attempt";
 import { paymentState } from "@/lib/budget";
-import type { Contributor, Payment } from "@/lib/data";
+import type { Payment } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
 import { m } from "@/lib/i18n";
 import { formatBRL } from "@/lib/money";
@@ -99,11 +99,9 @@ function PaidToggle({
 export function PaymentSheet({
   expenseId,
   payment,
-  contributors,
 }: {
   expenseId: string;
   payment: Payment | null;
-  contributors: Contributor[];
 }) {
   const [open, setOpen] = useState(false);
   const [id, setId] = useState(() => payment?.id ?? crypto.randomUUID());
@@ -111,7 +109,6 @@ export function PaymentSheet({
   const [dueOn, setDueOn] = useState(payment?.due_on ?? "");
   const [paidOn, setPaidOn] = useState(payment?.paid_on ?? "");
   const [method, setMethod] = useState<string>(payment?.method ?? "");
-  const [contributor, setContributor] = useState(payment?.contributor_id ?? "");
   const [note, setNote] = useState(payment?.note ?? "");
   const [status, setStatus] = useState("");
   const [saving, startSave] = useTransition();
@@ -128,7 +125,6 @@ export function PaymentSheet({
             dueOn,
             paidOn: paidOn || null,
             method: (method || null) as Method | null,
-            contributorId: contributor || null,
             note,
           },
           payment === null,
@@ -239,22 +235,6 @@ export function PaymentSheet({
                 ))}
               </NativeSelect>
             </Field>
-            {contributors.length > 0 && (
-              <Field id={`p-who-${id}`} label={m.budget.paidBy}>
-                <NativeSelect
-                  id={`p-who-${id}`}
-                  value={contributor}
-                  onChange={(e) => setContributor(e.target.value)}
-                >
-                  <option value="">{m.common.optional}</option>
-                  {contributors.map((option) => (
-                    <option key={option.id} value={option.id}>
-                      {option.name}
-                    </option>
-                  ))}
-                </NativeSelect>
-              </Field>
-            )}
             <Field id={`p-note-${id}`} label={m.budget.note}>
               <Input
                 id={`p-note-${id}`}
@@ -281,16 +261,13 @@ export function PaymentSheet({
 export function PaymentList({
   expenseId,
   payments,
-  contributors,
   editable,
 }: {
   expenseId: string;
   payments: Payment[];
-  contributors: Contributor[];
   editable: boolean;
 }) {
   const today = useToday();
-  const names = new Map(contributors.map((c) => [c.id, c.name]));
 
   return (
     <section aria-labelledby="pagamentos" className="flex flex-col gap-3">
@@ -298,13 +275,7 @@ export function PaymentList({
         <h2 id="pagamentos" className="text-headline font-semibold">
           {m.budget.payments}
         </h2>
-        {editable && (
-          <PaymentSheet
-            expenseId={expenseId}
-            payment={null}
-            contributors={contributors}
-          />
-        )}
+        {editable && <PaymentSheet expenseId={expenseId} payment={null} />}
       </div>
       {payments.length > 0 && (
         <ul className="divide-y overflow-hidden rounded-2xl bg-card">
@@ -312,7 +283,6 @@ export function PaymentList({
             const state = paymentState(payment, today);
             const details = [
               payment.method ? m.methods[payment.method] : null,
-              payment.contributor_id ? names.get(payment.contributor_id) : null,
             ].filter(Boolean);
             return (
               <li
@@ -346,11 +316,7 @@ export function PaymentList({
                   </span>
                 </div>
                 {editable && (
-                  <PaymentSheet
-                    expenseId={expenseId}
-                    payment={payment}
-                    contributors={contributors}
-                  />
+                  <PaymentSheet expenseId={expenseId} payment={payment} />
                 )}
               </li>
             );

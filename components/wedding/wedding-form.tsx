@@ -27,6 +27,7 @@ export function WeddingForm({
   const [partnerA, setPartnerA] = useState(wedding.partner_a);
   const [partnerB, setPartnerB] = useState(wedding.partner_b);
   const [date, setDate] = useState(wedding.wedding_date ?? "");
+  const [roughDate, setRoughDate] = useState(wedding.date_is_estimate);
   const [city, setCity] = useState(wedding.city ?? "");
   const [ceremony, setCeremony] = useState<Ceremony>(wedding.ceremony);
   const [guests, setGuests] = useState(
@@ -46,6 +47,7 @@ export function WeddingForm({
           partnerA,
           partnerB,
           weddingDate: date || null,
+          dateIsEstimate: roughDate,
           city,
           ceremony,
           guestEstimate:
@@ -105,9 +107,27 @@ export function WeddingForm({
               min="2000-01-01"
               max="2100-12-31"
               value={date}
-              onChange={(event) => setDate(event.target.value)}
+              onChange={(event) => {
+                setDate(event.target.value);
+                setRoughDate(false);
+              }}
               className="bg-card dark:bg-card"
             />
+            {date && (
+              <label
+                htmlFor="w-estimate"
+                className="flex min-h-11 items-center gap-3 text-subhead"
+              >
+                <input
+                  id="w-estimate"
+                  type="checkbox"
+                  checked={roughDate}
+                  onChange={(event) => setRoughDate(event.target.checked)}
+                  className="size-5 accent-primary"
+                />
+                {m.wedding.dateIsEstimate}
+              </label>
+            )}
           </Field>
           <Field id="w-city" label={m.wedding.city}>
             <Input

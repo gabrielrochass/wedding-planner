@@ -49,7 +49,6 @@ export default async function ExpensePage({
         <PaymentList
           expenseId={expense.id}
           payments={budget.payments.filter((p) => p.expense_id === id)}
-          contributors={budget.contributors}
           editable={editable}
         />
         {editable && (

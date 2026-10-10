@@ -5,8 +5,8 @@ import { PageHeader } from "@/components/app-shell/page-header";
 import { PaymentBadge } from "@/components/budget/payment-badge";
 import { Celebration } from "@/components/home/celebration";
 import { Countdown } from "@/components/home/countdown";
-import { Journey } from "@/components/home/journey";
 import { Milestones } from "@/components/home/milestones";
+import { PhaseCard } from "@/components/home/phase-card";
 import { ProgressRing } from "@/components/home/progress-ring";
 import { TaskBadge } from "@/components/tasks/task-badge";
 import { TaskCheck } from "@/components/tasks/task-check";
@@ -17,9 +17,9 @@ import {
   summarize,
   upcomingPayments,
 } from "@/lib/budget";
-import { daysBefore, dueDate, phaseFor, taskState } from "@/lib/checklist";
+import { dueDate, taskState } from "@/lib/checklist";
 import { getBudget, getGuests, getTasks, getVendors } from "@/lib/data";
-import { formatDate, todayInSaoPaulo } from "@/lib/dates";
+import { formatDate, formatMonth, todayInSaoPaulo } from "@/lib/dates";
 import { headcount } from "@/lib/guests";
 import { m } from "@/lib/i18n";
 import { formatWholeBRL } from "@/lib/money";
@@ -28,9 +28,9 @@ import { requireWedding } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
   daysUntil,
-  journey,
   milestones,
   overallProgress,
+  phaseStatus,
   ratio,
 } from "@/lib/wedding";
 
@@ -84,11 +84,7 @@ export default async function HomePage() {
 
   const done = tasks.filter((task) => task.done_at).length;
   const open = tasks.filter((task) => !task.done_at);
-  const openByPhase: Record<string, number> = {};
-  for (const task of open) {
-    const phase = phaseFor(daysBefore(task, date));
-    openByPhase[phase] = (openByPhase[phase] ?? 0) + 1;
-  }
+  const phase = phaseStatus(tasks, date, today);
   const focus = open
     .map((task) => ({ task, due: dueDate(task, date) }))
     .toSorted((a, b) => (a.due ?? "9999").localeCompare(b.due ?? "9999"))
@@ -163,7 +159,13 @@ export default async function HomePage() {
                   </span>
                   <span className="text-subhead text-muted-foreground">
                     {m.home.daysLeft(days)}
-                    {date ? `, ${formatDate(date, today)}` : ""}
+                    {date
+                      ? `, ${
+                          wedding.date_is_estimate
+                            ? m.home.estimated(formatMonth(date.slice(0, 7)))
+                            : formatDate(date, today)
+                        }`
+                      : ""}
                   </span>
                 </p>
               ) : (
@@ -195,7 +197,7 @@ export default async function HomePage() {
           <p className="sr-only">{m.home.progressParts}</p>
         </section>
 
-        <Journey steps={journey(date, today)} open={openByPhase} />
+        {phase && <PhaseCard status={phase} />}
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Card title={m.home.focus} href="/tarefas" more={m.home.focusMore}>

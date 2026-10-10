@@ -2,22 +2,52 @@ import { addMonthsToDate, daysBetween, monthsBetween } from "@/lib/dates";
 
 export const defaultContingency = 10;
 
-export type StarterCategory = { name: string; icon: string; percent: number };
+export const budgetPriorities = [
+  "espaco",
+  "comida",
+  "fotos",
+  "decoracao",
+  "musica",
+  "traje",
+  "doces",
+  "lua-de-mel",
+] as const;
+
+export type BudgetPriority = (typeof budgetPriorities)[number];
+
+export type StarterCategory = {
+  name: string;
+  icon: string;
+  percent: number;
+  priority?: BudgetPriority;
+};
 
 export const starterCategories: readonly StarterCategory[] = [
-  { name: "Espaço", icon: "building", percent: 18 },
-  { name: "Buffet e bebidas", icon: "utensils", percent: 32 },
-  { name: "Foto e vídeo", icon: "camera", percent: 10 },
-  { name: "Decoração e flores", icon: "flower", percent: 9 },
-  { name: "Música", icon: "music", percent: 6 },
-  { name: "Traje e beleza", icon: "shirt", percent: 7 },
-  { name: "Bolo e doces", icon: "cake", percent: 4 },
+  { name: "Espaço", icon: "building", percent: 18, priority: "espaco" },
+  {
+    name: "Buffet e bebidas",
+    icon: "utensils",
+    percent: 32,
+    priority: "comida",
+  },
+  { name: "Foto e vídeo", icon: "camera", percent: 10, priority: "fotos" },
+  {
+    name: "Decoração e flores",
+    icon: "flower",
+    percent: 9,
+    priority: "decoracao",
+  },
+  { name: "Música", icon: "music", percent: 6, priority: "musica" },
+  { name: "Traje e beleza", icon: "shirt", percent: 7, priority: "traje" },
+  { name: "Bolo e doces", icon: "cake", percent: 4, priority: "doces" },
   { name: "Alianças", icon: "gem", percent: 3 },
   { name: "Convites e papelaria", icon: "mail", percent: 2 },
   { name: "Cerimônia e documentos", icon: "church", percent: 2 },
-  { name: "Lua de mel", icon: "plane", percent: 5 },
+  { name: "Lua de mel", icon: "plane", percent: 5, priority: "lua-de-mel" },
   { name: "Lembrancinhas e extras", icon: "gift", percent: 2 },
 ];
+
+const priorityBoost = 1.5;
 
 export function contingencyCents(budget: number, percent: number) {
   return Math.round((budget * percent) / 100);
@@ -26,18 +56,25 @@ export function contingencyCents(budget: number, percent: number) {
 export function plannedByCategory(
   budget: number | null,
   contingencyPercent: number,
+  priorities: readonly BudgetPriority[] = [],
 ) {
-  return starterCategories.map((category) => ({
+  const weights = starterCategories.map((category) =>
+    category.priority && priorities.includes(category.priority)
+      ? category.percent * priorityBoost
+      : category.percent,
+  );
+  const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+  const available =
+    budget === null ? 0 : budget - contingencyCents(budget, contingencyPercent);
+  const planned = weights.map((weight) =>
+    Math.floor((available * weight) / totalWeight),
+  );
+  const heaviest = weights.indexOf(Math.max(...weights));
+  planned[heaviest] += available - planned.reduce((sum, c) => sum + c, 0);
+  return starterCategories.map((category, index) => ({
     name: category.name,
     icon: category.icon,
-    planned_cents:
-      budget === null
-        ? null
-        : Math.round(
-            ((budget - contingencyCents(budget, contingencyPercent)) *
-              category.percent) /
-              100,
-          ),
+    planned_cents: budget === null ? null : planned[index],
   }));
 }
 
@@ -54,7 +91,6 @@ export type PaymentRow = {
   amount_cents: number;
   due_on: string;
   paid_on: string | null;
-  contributor_id: string | null;
 };
 
 export function expenseCost(expense: ExpenseRow) {
@@ -168,25 +204,6 @@ export function unpaidTotal(payments: readonly PaymentRow[]) {
   return payments
     .filter((payment) => !payment.paid_on)
     .reduce((sum, payment) => sum + payment.amount_cents, 0);
-}
-
-export function contributorTotals(
-  contributors: readonly { id: string; promised_cents: number | null }[],
-  payments: readonly PaymentRow[],
-) {
-  const paid = new Map<string, number>();
-  for (const payment of payments) {
-    if (!payment.paid_on || !payment.contributor_id) continue;
-    paid.set(
-      payment.contributor_id,
-      (paid.get(payment.contributor_id) ?? 0) + payment.amount_cents,
-    );
-  }
-  return contributors.map((contributor) => ({
-    id: contributor.id,
-    promised: contributor.promised_cents,
-    paid: paid.get(contributor.id) ?? 0,
-  }));
 }
 
 export function monthlySaving(

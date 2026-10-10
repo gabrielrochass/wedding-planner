@@ -38,7 +38,7 @@ export const requireUser = cache(async () => {
 });
 
 const weddingColumns =
-  "id, partner_a, partner_b, wedding_date, city, ceremony, guest_estimate, budget_cents, contingency_percent, motto";
+  "id, partner_a, partner_b, wedding_date, date_is_estimate, city, ceremony, guest_estimate, budget_cents, contingency_percent, motto";
 
 export const requireWedding = cache(async () => {
   const user = await requireUser();

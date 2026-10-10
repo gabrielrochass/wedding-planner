@@ -45,7 +45,6 @@ async function createPerson(email: string) {
       p_ceremony: "both",
       p_tasks: [],
       p_categories: [],
-      p_contributor: "Ana e Bruno",
     })
     .throwOnError();
   return data.user.id;
@@ -176,10 +175,11 @@ test("a new person answers one question at a time and lands ready", async ({
     await expect(page).toHaveURL("/comecar?next=%2Ftarefas");
     await expect(page.getByLabel("Primeiro nome")).toHaveValue("Ana");
     await page.getByLabel("Segundo nome").fill("Bruno");
-    await page.getByRole("button", { name: "Continuar" }).click();
-    await page.getByRole("button", { name: "Continuar" }).click();
-    await page.getByRole("button", { name: "Continuar" }).click();
+    for (let step = 0; step < 5; step++) {
+      await page.getByRole("button", { name: "Continuar" }).click();
+    }
     await page.getByRole("button", { name: "Criar nosso casamento" }).click();
+    await page.getByRole("button", { name: "Depois eu chamo" }).click();
     await expect(
       page.getByRole("heading", { name: "Tudo pronto!" }),
     ).toBeVisible();

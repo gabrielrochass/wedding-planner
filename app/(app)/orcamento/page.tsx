@@ -10,14 +10,12 @@ import Link from "next/link";
 import { EmptyState } from "@/components/app-shell/empty-state";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { BudgetDonut, sliceColor } from "@/components/budget/budget-donut";
-import { ContributorSheet } from "@/components/budget/contributor-sheet";
 import { PaymentBadge } from "@/components/budget/payment-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   contingencyCents,
-  contributorTotals,
   monthlySaving,
   paymentState,
   perGuest,
@@ -110,7 +108,6 @@ export default async function BudgetPage() {
   );
   const next = upcomingPayments(budget.payments, 5);
   const expenseTitle = new Map(budget.expenses.map((e) => [e.id, e.title]));
-  const contributors = contributorTotals(budget.contributors, budget.payments);
 
   return (
     <>
@@ -334,64 +331,6 @@ export default async function BudgetPage() {
               })}
             </ul>
           )}
-        </section>
-
-        <section aria-labelledby="quem-paga" className="flex flex-col gap-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex flex-col">
-              <h2 id="quem-paga" className="text-headline font-semibold">
-                {m.budget.contributors}
-              </h2>
-              <p className="text-footnote text-muted-foreground">
-                {m.budget.contributorsHint}
-              </p>
-            </div>
-            {editable && <ContributorSheet contributor={null} />}
-          </div>
-          <ul className="divide-y overflow-hidden rounded-2xl bg-card">
-            {contributors.map((row) => {
-              const contributor = budget.contributors.find(
-                (c) => c.id === row.id,
-              );
-              if (!contributor) return null;
-              const share = row.promised
-                ? Math.min(row.paid / row.promised, 1)
-                : null;
-              return (
-                <li key={row.id} className="flex items-center gap-3 px-4 py-3">
-                  <span className="flex min-w-0 flex-1 flex-col gap-1.5">
-                    <span className="flex items-baseline justify-between gap-2">
-                      <span className="truncate text-body font-medium">
-                        {contributor.name}
-                      </span>
-                      <span className="shrink-0 text-subhead tabular-nums">
-                        {row.promised
-                          ? m.budget.contributorPaid(
-                              formatWholeBRL(row.paid),
-                              formatWholeBRL(row.promised),
-                            )
-                          : m.budget.contributorPaidOnly(
-                              formatWholeBRL(row.paid),
-                            )}
-                      </span>
-                    </span>
-                    {share !== null && (
-                      <span
-                        aria-hidden="true"
-                        className="h-2 overflow-hidden rounded-full bg-muted"
-                      >
-                        <span
-                          className="block h-full origin-left animate-grow-x rounded-full bg-success"
-                          style={{ width: `${share * 100}%` }}
-                        />
-                      </span>
-                    )}
-                  </span>
-                  {editable && <ContributorSheet contributor={contributor} />}
-                </li>
-              );
-            })}
-          </ul>
         </section>
       </div>
     </>

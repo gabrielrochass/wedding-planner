@@ -7,11 +7,11 @@ import { HouseholdEditor } from "@/components/guests/household-editor";
 import { RsvpSwitch } from "@/components/guests/rsvp-switch";
 import { buttonVariants } from "@/components/ui/button";
 import { getHomeItems, getHousehold } from "@/lib/data";
-import { formatFullDate } from "@/lib/dates";
 import { m } from "@/lib/i18n";
 import { canHelp } from "@/lib/roles";
 import { requireWedding } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { weddingDateLabel } from "@/lib/wedding";
 import { formatPhone, whatsappLink } from "@/lib/whatsapp";
 
 export const metadata: Metadata = { title: m.guests.editHousehold };
@@ -30,9 +30,7 @@ export default async function HouseholdPage({
   if (!household) notFound();
   const editable = canHelp(role);
   const couple = m.home.couple(wedding.partner_a, wedding.partner_b);
-  const date = wedding.wedding_date
-    ? formatFullDate(wedding.wedding_date)
-    : null;
+  const date = weddingDateLabel(wedding.wedding_date, wedding.date_is_estimate);
   const phone = household.phone ?? "";
   const messages = (
     [

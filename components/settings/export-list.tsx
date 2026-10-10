@@ -40,8 +40,7 @@ function rows<T>(
     | "expenses"
     | "payments"
     | "vendors"
-    | "budget_categories"
-    | "contributors",
+    | "budget_categories",
   columns: string,
   weddingId: string,
 ) {
@@ -91,45 +90,37 @@ const files = {
     };
   },
   expenses: async (supabase: Supabase, context: Context) => {
-    const [expenses, payments, categories, vendors, contributors] =
-      await Promise.all([
-        rows<Parameters<typeof expensesCsv>[0][number]>(
-          supabase,
-          "expenses",
-          "id, category_id, vendor_id, title, estimated_cents, contracted_cents",
-          context.weddingId,
-        ),
-        rows<Parameters<typeof expensesCsv>[1][number]>(
-          supabase,
-          "payments",
-          "expense_id, amount_cents, due_on, paid_on, method, contributor_id",
-          context.weddingId,
-        ),
-        rows<{ id: string; name: string }>(
-          supabase,
-          "budget_categories",
-          "id, name",
-          context.weddingId,
-        ),
-        rows<{ id: string; name: string }>(
-          supabase,
-          "vendors",
-          "id, name",
-          context.weddingId,
-        ),
-        rows<{ id: string; name: string }>(
-          supabase,
-          "contributors",
-          "id, name",
-          context.weddingId,
-        ),
-      ]);
+    const [expenses, payments, categories, vendors] = await Promise.all([
+      rows<Parameters<typeof expensesCsv>[0][number]>(
+        supabase,
+        "expenses",
+        "id, category_id, vendor_id, title, estimated_cents, contracted_cents",
+        context.weddingId,
+      ),
+      rows<Parameters<typeof expensesCsv>[1][number]>(
+        supabase,
+        "payments",
+        "expense_id, amount_cents, due_on, paid_on, method",
+        context.weddingId,
+      ),
+      rows<{ id: string; name: string }>(
+        supabase,
+        "budget_categories",
+        "id, name",
+        context.weddingId,
+      ),
+      rows<{ id: string; name: string }>(
+        supabase,
+        "vendors",
+        "id, name",
+        context.weddingId,
+      ),
+    ]);
     return {
       rows: payments.length || expenses.length,
       csv: expensesCsv(expenses, payments, {
         categories,
         vendors,
-        contributors,
       }),
     };
   },

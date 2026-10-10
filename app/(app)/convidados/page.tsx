@@ -12,12 +12,12 @@ import { GuestList } from "@/components/guests/guest-list";
 import { GuestSummary } from "@/components/guests/guest-summary";
 import { buttonVariants } from "@/components/ui/button";
 import { getGuests } from "@/lib/data";
-import { formatFullDate } from "@/lib/dates";
 import { headcount } from "@/lib/guests";
 import { m } from "@/lib/i18n";
 import { canHelp } from "@/lib/roles";
 import { requireWedding } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
+import { weddingDateLabel } from "@/lib/wedding";
 
 export const metadata: Metadata = { title: m.guests.title };
 
@@ -119,9 +119,10 @@ export default async function GuestsPage() {
             households={households}
             guests={guests}
             couple={m.home.couple(wedding.partner_a, wedding.partner_b)}
-            dateLabel={
-              wedding.wedding_date ? formatFullDate(wedding.wedding_date) : null
-            }
+            dateLabel={weddingDateLabel(
+              wedding.wedding_date,
+              wedding.date_is_estimate,
+            )}
           />
         </div>
       )}

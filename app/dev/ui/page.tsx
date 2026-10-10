@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { BudgetDonut } from "@/components/budget/budget-donut";
 import { PaymentBadge } from "@/components/budget/payment-badge";
 import { GuestSummary } from "@/components/guests/guest-summary";
-import { Journey } from "@/components/home/journey";
 import { Milestones } from "@/components/home/milestones";
+import { PhaseCard } from "@/components/home/phase-card";
 import { ProgressRing } from "@/components/home/progress-ring";
 import { TaskBadge } from "@/components/tasks/task-badge";
 import { Button } from "@/components/ui/button";
 import { headcount } from "@/lib/guests";
-import { journey, milestones } from "@/lib/wedding";
+import { milestones } from "@/lib/wedding";
 
 export const metadata: Metadata = {
   title: "Galeria de componentes",
@@ -149,9 +149,15 @@ export default function DevUiPage() {
             ]}
           />
         </div>
-        <Journey
-          steps={journey("2028-02-20", "2027-09-01")}
-          open={{ "12m": 0, "6m": 4, "3m": 9 }}
+        <PhaseCard
+          status={{
+            current: "6m",
+            done: 5,
+            total: 9,
+            behind: 2,
+            next: "3m",
+            nextIn: 47,
+          }}
         />
         <Milestones
           items={milestones({

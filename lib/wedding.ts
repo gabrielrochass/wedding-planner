@@ -1,28 +1,68 @@
-import { currentPhase, type PhaseKey, phaseKeys } from "@/lib/checklist";
-import { daysBetween } from "@/lib/dates";
+import {
+  currentPhase,
+  daysBefore,
+  type PhaseKey,
+  phaseFor,
+  phaseKeys,
+  phaseStart,
+  type TaskTiming,
+} from "@/lib/checklist";
+import { daysBetween, formatFullDate, formatMonth } from "@/lib/dates";
 
 export function daysUntil(weddingDate: string | null, today: string) {
   return weddingDate ? daysBetween(today, weddingDate) : null;
 }
 
-export const journeyPhases = phaseKeys.filter(
-  (key): key is Exclude<PhaseKey, "undated"> => key !== "undated",
+export function weddingDateLabel(
+  weddingDate: string | null,
+  estimate: boolean,
+) {
+  if (!weddingDate) return null;
+  return estimate
+    ? formatMonth(weddingDate.slice(0, 7))
+    : formatFullDate(weddingDate);
+}
+
+const datedPhases: readonly PhaseKey[] = phaseKeys.filter(
+  (key) => key !== "undated",
 );
 
-export function journey(weddingDate: string | null, today: string) {
+export function phaseStatus(
+  tasks: readonly (TaskTiming & { done_at: string | null })[],
+  weddingDate: string | null,
+  today: string,
+) {
   const current = currentPhase(weddingDate, today);
-  const index = current ? journeyPhases.indexOf(current as never) : -1;
-  return journeyPhases.map((key, position) => ({
-    key,
-    state:
-      index === -1
-        ? ("upcoming" as const)
-        : position < index
-          ? ("past" as const)
-          : position === index
-            ? ("current" as const)
-            : ("upcoming" as const),
-  }));
+  if (!weddingDate || !current) return null;
+  const position = datedPhases.indexOf(current);
+  let done = 0;
+  let total = 0;
+  let behind = 0;
+  for (const task of tasks) {
+    const phase = phaseFor(daysBefore(task, weddingDate));
+    if (phase === current) {
+      total++;
+      if (task.done_at) done++;
+    } else if (
+      !task.done_at &&
+      phase !== "undated" &&
+      datedPhases.indexOf(phase) < position
+    ) {
+      behind++;
+    }
+  }
+  const next = datedPhases[position + 1] ?? null;
+  const nextStart = next ? phaseStart(next) : null;
+  const days = daysBetween(today, weddingDate);
+  return {
+    current,
+    done,
+    total,
+    behind,
+    next,
+    nextIn:
+      next === null ? null : nextStart === null ? days + 1 : days - nextStart,
+  };
 }
 
 export function ratio(done: number, total: number) {

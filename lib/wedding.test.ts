@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import { cheapestQuote, normalizeInstagram, safeWebsite } from "./vendors";
 import {
   daysUntil,
-  journey,
   milestones,
   overallProgress,
+  phaseStatus,
   ratio,
+  weddingDateLabel,
 } from "./wedding";
 import { formatPhone, normalizePhone, whatsappLink } from "./whatsapp";
 
@@ -15,17 +16,37 @@ describe("wedding", () => {
     expect(daysUntil(null, "2026-10-09")).toBeNull();
   });
 
-  it("marks the journey around the current phase", () => {
-    const steps = journey("2028-02-20", "2027-12-01");
-    expect(steps.find((s) => s.state === "current")?.key).toBe("3m");
-    expect(steps.filter((s) => s.state === "past").map((s) => s.key)).toEqual([
-      "12m",
-      "9m",
-      "6m",
-    ]);
+  it("names only the month while the date is an estimate", () => {
+    expect(weddingDateLabel("2028-02-20", false)).toBe(
+      "20 de fevereiro de 2028",
+    );
+    expect(weddingDateLabel("2028-02-01", true)).toBe("fevereiro de 2028");
+    expect(weddingDateLabel(null, true)).toBeNull();
+  });
+
+  it("sums up the current phase and what comes next", () => {
+    const task = (offset_days: number, done = false) => ({
+      offset_days,
+      due_on: null,
+      done_at: done ? "2027-01-01T00:00:00Z" : null,
+    });
+    const status = phaseStatus(
+      [task(300, true), task(260), task(250, true), task(160), task(100)],
+      "2028-02-20",
+      "2027-06-01",
+    );
+    expect(status).toEqual({
+      current: "9m",
+      done: 2,
+      total: 3,
+      behind: 0,
+      next: "6m",
+      nextIn: 114,
+    });
     expect(
-      journey(null, "2027-12-01").every((s) => s.state === "upcoming"),
-    ).toBe(true);
+      phaseStatus([task(300), task(100)], "2028-02-20", "2027-10-01")?.behind,
+    ).toBe(1);
+    expect(phaseStatus([task(300)], null, "2027-10-01")).toBeNull();
   });
 
   it("averages only the parts that exist", () => {

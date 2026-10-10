@@ -134,12 +134,7 @@ export type ExpenseExport = Pick<
 >;
 export type PaymentExport = Pick<
   Tables<"payments">,
-  | "expense_id"
-  | "amount_cents"
-  | "due_on"
-  | "paid_on"
-  | "method"
-  | "contributor_id"
+  "expense_id" | "amount_cents" | "due_on" | "paid_on" | "method"
 >;
 
 export function expensesCsv(
@@ -148,12 +143,10 @@ export function expensesCsv(
   lookups: {
     categories: readonly Named[];
     vendors: readonly Named[];
-    contributors: readonly Named[];
   },
 ) {
   const categoryNames = names(lookups.categories);
   const vendorNames = names(lookups.vendors);
-  const contributorNames = names(lookups.contributors);
   return toCsv(
     [
       column.category,
@@ -165,7 +158,6 @@ export function expensesCsv(
       column.dueOn,
       column.paidOn,
       column.method,
-      column.paidBy,
     ],
     expenses.flatMap((expense) => {
       const base = [
@@ -176,16 +168,13 @@ export function expensesCsv(
         amount(expense.contracted_cents),
       ];
       const own = payments.filter((p) => p.expense_id === expense.id);
-      if (own.length === 0) return [[...base, "", "", "", "", ""]];
+      if (own.length === 0) return [[...base, "", "", "", ""]];
       return own.map((payment) => [
         ...base,
         amount(payment.amount_cents),
         payment.due_on,
         payment.paid_on,
         payment.method ? m.methods[payment.method] : "",
-        payment.contributor_id
-          ? (contributorNames.get(payment.contributor_id) ?? "")
-          : "",
       ]);
     }),
   );

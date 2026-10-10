@@ -42,6 +42,10 @@ const phaseStarts: readonly [PhaseKey, number][] = [
   ["day", 0],
 ];
 
+export function phaseStart(key: PhaseKey) {
+  return phaseStarts.find(([phase]) => phase === key)?.[1] ?? null;
+}
+
 export function phaseFor(daysBefore: number | null): PhaseKey {
   if (daysBefore === null) return "undated";
   for (const [key, start] of phaseStarts) {
@@ -58,9 +62,32 @@ export type StarterTask = {
   offset_days: number;
   notes: string | null;
   template_key: string | null;
+  done: boolean;
 };
 
-type Template = StarterTask & { only?: readonly Ceremony[] };
+export const bookings = [
+  "espaco",
+  "cerimonia",
+  "assessoria",
+  "buffet",
+  "fotos",
+  "musica",
+  "decoracao",
+  "doces",
+  "traje",
+  "aliancas",
+  "beleza",
+  "lua-de-mel",
+] as const;
+
+export type Booking = (typeof bookings)[number];
+
+type Settled = Booking | "data";
+
+type Template = Omit<StarterTask, "done"> & {
+  only?: readonly Ceremony[];
+  settled?: Settled;
+};
 
 const religious: readonly Ceremony[] = ["religious", "both"];
 
@@ -68,7 +95,12 @@ const template = (
   title: string,
   area: TaskArea,
   offset_days: number,
-  extra: { notes?: string; key?: string; only?: readonly Ceremony[] } = {},
+  extra: {
+    notes?: string;
+    key?: string;
+    only?: readonly Ceremony[];
+    settled?: Settled;
+  } = {},
 ): Template => ({
   title,
   area,
@@ -76,47 +108,75 @@ const template = (
   notes: extra.notes ?? null,
   template_key: extra.key ?? null,
   only: extra.only,
+  settled: extra.settled,
 });
 
 const templates: readonly Template[] = [
-  template("Definir o orçamento e quem vai ajudar a pagar", "geral", 365),
-  template("Escolher a data e o estilo do casamento", "geral", 360),
+  template("Definir o orçamento total", "geral", 365),
+  template("Escolher a data e o estilo do casamento", "geral", 360, {
+    settled: "data",
+  }),
   template("Fazer a primeira lista de convidados", "convidados", 355),
-  template("Pesquisar e visitar espaços", "fornecedores", 350),
-  template("Contratar o espaço da festa", "fornecedores", 335),
+  template("Pesquisar e visitar espaços", "fornecedores", 350, {
+    settled: "espaco",
+  }),
+  template("Contratar o espaço da festa", "fornecedores", 335, {
+    settled: "espaco",
+  }),
   template("Reservar a igreja ou o local da cerimônia", "cerimonia", 330, {
     only: religious,
+    settled: "cerimonia",
   }),
-  template("Contratar assessoria ou cerimonial", "fornecedores", 330),
-  template("Contratar buffet e marcar a degustação", "fornecedores", 300),
-  template("Contratar fotografia e filmagem", "fornecedores", 300),
+  template("Contratar assessoria ou cerimonial", "fornecedores", 330, {
+    settled: "assessoria",
+  }),
+  template("Contratar buffet e marcar a degustação", "fornecedores", 300, {
+    settled: "buffet",
+  }),
+  template("Contratar fotografia e filmagem", "fornecedores", 300, {
+    settled: "fotos",
+  }),
   template("Fazer a inscrição no curso de noivos", "cerimonia", 300, {
     notes:
       "Faça entre 12 e 6 meses antes. O certificado costuma valer 1 ano, confirme com a sua paróquia.",
     key: "curso-noivos",
     only: religious,
   }),
-  template("Contratar banda ou DJ", "fornecedores", 270),
-  template("Contratar decoração e flores", "fornecedores", 270),
+  template("Contratar banda ou DJ", "fornecedores", 270, {
+    settled: "musica",
+  }),
+  template("Contratar decoração e flores", "fornecedores", 270, {
+    settled: "decoracao",
+  }),
   template("Montar o site do casamento", "convidados", 250),
   template("Enviar o save the date", "convidados", 240),
   template("Escolher padrinhos e madrinhas", "padrinhos", 220),
-  template("Escolher o vestido ou o traje", "traje", 210),
+  template("Escolher o vestido ou o traje", "traje", 210, {
+    settled: "traje",
+  }),
   template("Dar entrada no processo da igreja", "cerimonia", 180, {
     notes:
       "O processo leva uns 3 meses. Separe batistério, certidões e o certificado do curso de noivos.",
     key: "processo-igreja",
     only: religious,
   }),
-  template("Contratar bolo, doces e bem-casados", "fornecedores", 180),
-  template("Reservar a lua de mel", "lua-de-mel", 180),
+  template("Contratar bolo, doces e bem-casados", "fornecedores", 180, {
+    settled: "doces",
+  }),
+  template("Reservar a lua de mel", "lua-de-mel", 180, {
+    settled: "lua-de-mel",
+  }),
   template("Montar a lista de presentes", "convidados", 170),
-  template("Contratar cabelo e maquiagem", "beleza", 160),
+  template("Contratar cabelo e maquiagem", "beleza", 160, {
+    settled: "beleza",
+  }),
   template("Encomendar convites e papelaria", "papelaria", 140),
   template("Convidar os padrinhos com o convite caixinha", "padrinhos", 120, {
     notes: "Encomende o convite caixinha com uns 4 meses de antecedência.",
   }),
-  template("Escolher as alianças e a gravação", "traje", 120),
+  template("Escolher as alianças e a gravação", "traje", 120, {
+    settled: "aliancas",
+  }),
   template("Escolher as músicas da cerimônia", "cerimonia", 100),
   template("Organizar a despedida de solteiro", "geral", 90),
   template("Organizar o chá de casa nova", "geral", 90),
@@ -161,10 +221,20 @@ const templates: readonly Template[] = [
   template("Atualizar documentos com o novo estado civil", "depois", -60),
 ];
 
-export function starterTasks(ceremony: Ceremony): StarterTask[] {
+export function starterTasks(
+  ceremony: Ceremony,
+  {
+    booked = [],
+    hasDate = false,
+  }: { booked?: readonly Booking[]; hasDate?: boolean } = {},
+): StarterTask[] {
+  const settled = new Set<Settled>(hasDate ? [...booked, "data"] : booked);
   return templates
     .filter((task) => !task.only || task.only.includes(ceremony))
-    .map(({ only: _, ...task }) => task);
+    .map(({ only: _, settled: key, ...task }) => ({
+      ...task,
+      done: key !== undefined && settled.has(key),
+    }));
 }
 
 export type TaskTiming = {

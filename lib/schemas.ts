@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { ptBR } from "zod/locales";
-import { taskAreas } from "@/lib/checklist";
+import { budgetPriorities } from "@/lib/budget";
+import { bookings, taskAreas } from "@/lib/checklist";
 import { homeRooms } from "@/lib/home";
 import { m } from "@/lib/i18n";
 import { categoryIconKeys } from "@/lib/icons";
 import { ideaBoards } from "@/lib/ideas";
 import { musicMoments } from "@/lib/music";
+import { maxPriorities, personas } from "@/lib/onboarding";
 import { partyRoles } from "@/lib/party";
 import { Constants } from "@/lib/supabase/database.types";
 
@@ -46,6 +48,7 @@ export const weddingInput = z.object({
   partnerA: person,
   partnerB: person,
   weddingDate: isoDate.nullable(),
+  dateIsEstimate: z.boolean(),
   city: text(80),
   ceremony: z.enum(enums.ceremony_kind),
   guestEstimate: z.number().int().min(1).max(5000).nullable(),
@@ -53,6 +56,14 @@ export const weddingInput = z.object({
 });
 
 export type WeddingInput = z.input<typeof weddingInput>;
+
+export const onboardingInput = weddingInput.extend({
+  persona: z.enum(personas),
+  booked: z.array(z.enum(bookings)).max(bookings.length),
+  priorities: z.array(z.enum(budgetPriorities)).max(maxPriorities),
+});
+
+export type OnboardingInput = z.input<typeof onboardingInput>;
 
 export const weddingSettingsInput = weddingInput.omit({ id: true }).extend({
   motto: text(200),
@@ -113,19 +124,10 @@ export const paymentInput = z.object({
   dueOn: isoDate,
   paidOn: isoDate.nullable(),
   method: z.enum(enums.payment_method).nullable(),
-  contributorId: z.uuid().nullable(),
   note: text(120),
 });
 
 export type PaymentInput = z.input<typeof paymentInput>;
-
-export const contributorInput = z.object({
-  id: z.uuid(),
-  name: label(40),
-  promisedCents: optionalMoney,
-});
-
-export type ContributorInput = z.input<typeof contributorInput>;
 
 export const vendorInput = z.object({
   id: z.uuid(),

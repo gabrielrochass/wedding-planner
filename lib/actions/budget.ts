@@ -13,9 +13,7 @@ import { m } from "@/lib/i18n";
 import { canEdit } from "@/lib/roles";
 import {
   type CategoryInput,
-  type ContributorInput,
   categoryInput,
-  contributorInput,
   type ExpenseInput,
   expenseInput,
   fieldErrors,
@@ -182,7 +180,6 @@ export async function savePayment(
     due_on: p.dueOn,
     paid_on: p.paidOn,
     method: p.method,
-    contributor_id: p.contributorId,
     note: p.note,
   };
   const { error } = isNew
@@ -232,49 +229,6 @@ export async function deletePayment(id: string): Promise<ActionResult> {
   if (!context) return forbidden;
   const { error } = await context.supabase
     .from("payments")
-    .delete()
-    .eq("wedding_id", context.wedding.id)
-    .eq("id", parsed.data);
-  if (error) return failureFor(error);
-  refresh();
-  return { ok: true };
-}
-
-export async function saveContributor(
-  input: ContributorInput,
-  isNew: boolean,
-): Promise<ActionResult> {
-  const parsed = contributorInput.safeParse(input);
-  if (!parsed.success) return { ok: false, errors: fieldErrors(parsed.error) };
-  const c = parsed.data;
-  const context = await requireEditor();
-  if (!context) return forbidden;
-  const { supabase, wedding } = context;
-  const fields = { name: c.name, promised_cents: c.promisedCents };
-  const { error } = isNew
-    ? await supabase
-        .from("contributors")
-        .upsert(
-          { id: c.id, wedding_id: wedding.id, ...fields },
-          { onConflict: "id", ignoreDuplicates: true },
-        )
-    : await supabase
-        .from("contributors")
-        .update(fields)
-        .eq("wedding_id", wedding.id)
-        .eq("id", c.id);
-  if (error) return failureFor(error);
-  refresh();
-  return { ok: true };
-}
-
-export async function deleteContributor(id: string): Promise<ActionResult> {
-  const parsed = z.uuid().safeParse(id);
-  if (!parsed.success) return failure;
-  const context = await requireEditor();
-  if (!context) return forbidden;
-  const { error } = await context.supabase
-    .from("contributors")
     .delete()
     .eq("wedding_id", context.wedding.id)
     .eq("id", parsed.data);
