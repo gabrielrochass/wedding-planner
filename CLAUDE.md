@@ -1,6 +1,6 @@
 @AGENTS.md
 
-# Sim a Dois
+# Dois em Um
 
 Web app de planejamento de casamento (pt-BR): checklist com prazos brasileiros, orçamento com parcelas e contribuidores,
 fornecedores em funil, convidados por família com triagem e WhatsApp. SaaS público, gratuito, multi-tenant por

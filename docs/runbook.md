@@ -1,6 +1,6 @@
 # Runbook de incidentes
 
-Roteiro curto para incidentes de segurança com dados pessoais. O Sim a Dois é mantido por um agente de
+Roteiro curto para incidentes de segurança com dados pessoais. O Dois em Um é mantido por um agente de
 tratamento de pequeno porte (Res. CD/ANPD 2/2022), por isso os prazos abaixo já estão em dobro.
 
 ## 1. Conter

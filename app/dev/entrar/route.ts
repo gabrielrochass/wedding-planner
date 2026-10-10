@@ -19,8 +19,8 @@ export async function GET(request: Request) {
   const devUser = {
     email:
       alias && /^[a-z0-9-]{1,32}$/.test(alias)
-        ? `e2e-${alias}@simadois.local`
-        : (process.env.DEV_AUTH_EMAIL ?? "dev@simadois.local"),
+        ? `e2e-${alias}@doisemum.local`
+        : (process.env.DEV_AUTH_EMAIL ?? "dev@doisemum.local"),
     password: "dev-only-local-password",
   };
 

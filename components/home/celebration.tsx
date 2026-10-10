@@ -59,7 +59,7 @@ export function Celebration({
   const signature = reached.join(",");
 
   useEffect(() => {
-    const key = `simadois:conquistas:${weddingId}`;
+    const key = `doisemum:conquistas:${weddingId}`;
     const keys = signature ? (signature.split(",") as MilestoneKey[]) : [];
     const seen = read(key);
     write(key, keys);

@@ -9,7 +9,7 @@ const options = { auth: { persistSession: false, autoRefreshToken: false } };
 const publicPages = ["/entrar", "/cadastro", "/termos", "/privacidade"];
 
 function emailOf(alias: string) {
-  return `e2e-${alias}@simadois.local`;
+  return `e2e-${alias}@doisemum.local`;
 }
 
 function admin() {
@@ -21,7 +21,7 @@ function admin() {
 }
 
 function freshEmail(tag: string, testInfo: TestInfo) {
-  return `e2e-${tag}-${testInfo.project.name}-${Date.now()}@simadois.local`;
+  return `e2e-${tag}-${testInfo.project.name}-${Date.now()}@doisemum.local`;
 }
 
 async function createPerson(email: string) {

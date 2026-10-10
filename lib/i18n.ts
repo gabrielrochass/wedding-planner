@@ -3,10 +3,10 @@ const plural = (n: number, one: string, many: string) =>
 
 export const m = {
   app: {
-    name: "Sim a Dois",
-    shortName: "Sim a Dois",
+    name: "Dois em Um",
+    shortName: "Dois em Um",
     description:
-      "Cada decisão, um sim a dois. Planejem o casamento juntos, do checklist com os prazos do Brasil à casa nova.",
+      "Planejem o casamento juntos, do checklist com os prazos do Brasil à casa nova.",
   },
   common: {
     back: "Voltar",
@@ -776,7 +776,7 @@ ${lines}`,
     copied: "Link copiado",
     sendWhatsapp: "Enviar pelo WhatsApp",
     inviteMessage: (couple: string, url: string) =>
-      `Vem planejar o casamento de ${couple} comigo no Sim a Dois: ${url}`,
+      `Vem planejar o casamento de ${couple} comigo no Dois em Um: ${url}`,
     changeRole: (name: string) => `Papel de ${name}`,
     roleChanged: "Papel alterado",
     remove: (name: string) => `Remover ${name}`,
@@ -857,7 +857,7 @@ ${lines}`,
   },
   auth: {
     title: "Entrar",
-    tagline: "Cada decisão, um sim a dois.",
+    tagline: "Planejem juntos, do sim à casa nova.",
     points: [
       "Checklist com os prazos do cartório e da igreja.",
       "Orçamento com parcelas e quem ajuda a pagar.",

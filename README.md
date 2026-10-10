@@ -1,4 +1,4 @@
-# Sim a Dois
+# Dois em Um
 
 Planejamento de casamento em pt-BR, feito para o casal planejar a dois: checklist com os prazos do cartório e da
 igreja, orçamento com parcelas e quem ajuda a pagar, fornecedores em funil com comparação lado a lado e convidados
@@ -58,8 +58,10 @@ Configure nesta ordem. `<ref>` é o ID do projeto no Supabase e `<domínio>` é 
    Não rode `supabase config push`: ele mandaria a configuração local para a nuvem.
 3. **GitHub**:
    - torne `main` a branch padrão, porque o backup agendado só roda nela;
-   - crie o secret `SUPABASE_DB_URL` (no repositório ou no environment `production`) com a URI do Session pooler
-     (IPv4) do botão Connect, com a senha codificada para URL;
+   - no environment `production`, crie o secret `SUPABASE_ACCESS_TOKEN` (Account > Access Tokens no Supabase) e a
+     variável `SUPABASE_PROJECT_REF` com o ID do projeto; o Migrate usa os dois e dispensa a senha do banco;
+   - para o Backup, crie também o secret `SUPABASE_DB_URL` com a URI do Session pooler (IPv4) do botão Connect, com
+     a senha codificada para URL;
    - crie a variável `BACKUP_AGE_RECIPIENT` com a chave pública do age (veja [Chaves](docs/runbook.md#chaves));
    - rode Actions > Migrate > Run workflow para criar o schema; depois ele roda sozinho a cada push na `main` que
      mude `supabase/migrations`;
