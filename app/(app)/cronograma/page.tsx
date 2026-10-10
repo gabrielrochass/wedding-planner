@@ -63,7 +63,10 @@ export default async function TimelinePage() {
           />
         ) : (
           <>
-            <ol className="relative flex flex-col gap-4 pl-6 before:absolute before:top-2 before:bottom-2 before:left-[0.6875rem] before:w-0.5 before:bg-border">
+            <ol
+              data-tour="cronograma-linha"
+              className="relative flex flex-col gap-4 pl-6 before:absolute before:top-2 before:bottom-2 before:left-[0.6875rem] before:w-0.5 before:bg-border"
+            >
               {ordered.map((item) => (
                 <li key={item.id} className="relative">
                   <span
@@ -143,6 +146,7 @@ export default async function TimelinePage() {
               ))}
             </ol>
             <a
+              data-tour="cronograma-whatsapp"
               href={`https://wa.me/?text=${encodeURIComponent(m.timeline.shareText(couple, shareLines))}`}
               target="_blank"
               rel="noopener noreferrer"

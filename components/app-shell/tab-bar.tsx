@@ -3,7 +3,13 @@ import { m } from "@/lib/i18n";
 import { type NavItem, primaryNav } from "./nav-items";
 import { NavLink } from "./nav-link";
 
-export function TabBar({ canAdd }: { canAdd: boolean }) {
+export function TabBar({
+  canAdd,
+  canEdit,
+}: {
+  canAdd: boolean;
+  canEdit: boolean;
+}) {
   const [first, second, ...rest] = primaryNav;
 
   return (
@@ -15,7 +21,7 @@ export function TabBar({ canAdd }: { canAdd: boolean }) {
         <TabItem item={first} />
         <TabItem item={second} />
         <li className="flex justify-center">
-          {canAdd && <QuickAdd variant="tab" />}
+          {canAdd && <QuickAdd variant="tab" canEdit={canEdit} />}
         </li>
         {rest.map((item) => (
           <TabItem key={item.href} item={item} />

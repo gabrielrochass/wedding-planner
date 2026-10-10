@@ -20,6 +20,7 @@ export function NavLink({
   return (
     <Link
       href={href}
+      data-tour={`nav-${href === "/" ? "inicio" : href.slice(1)}`}
       aria-current={active ? "page" : undefined}
       className={className}
     >

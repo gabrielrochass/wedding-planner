@@ -78,8 +78,766 @@ export const m = {
   roleHints: {
     couple: "Pode tudo, inclusive convidar pessoas e excluir o casamento.",
     planner: "Edita tudo, menos a equipe.",
-    helper: "Edita convidados e tarefas e vê o resto.",
+    helper:
+      "Edita tarefas, convidados, ideias, músicas, cortejo, cronograma e enxoval. Vê orçamento e fornecedores.",
     viewer: "Vê tudo e não muda nada.",
+  },
+  tour: {
+    help: "Como funciona esta tela",
+    step: (label: string, current: number, total: number) =>
+      `${label}, ${current} de ${total}`,
+    next: "Próximo",
+    back: "Anterior",
+    finish: "Concluir",
+    skip: "Pular",
+    close: "Fechar",
+    continueWith: (label: string) => `Ver o tour de ${label}`,
+    replayGeneral: "Rever o tour geral",
+    replayGeneralHint: "A visão geral do app e de como tudo se conecta",
+    replayPages: "Rever os tours das abas",
+    replayPagesHint: "Cada aba volta a mostrar o seu tour na próxima visita",
+    section: "Ajuda",
+  },
+  tours: {
+    geral: {
+      label: "Visão geral",
+      steps: [
+        {
+          title: "Boas-vindas ao Dois em Um",
+          text: [
+            "Aqui vocês planejam o casamento inteiro em um lugar só: tarefas com prazos, orçamento com parcelas, fornecedores, convidados, ideias, músicas, cortejo, cronograma do dia e o enxoval da casa nova.",
+            "Tudo pertence a um casamento só, compartilhado com quem vocês chamarem para a equipe. O que uma pessoa muda, as outras veem ao abrir a tela.",
+            "Este tour mostra onde fica cada coisa e como as partes conversam entre si. Avancem pelos botões ou pelas setas do teclado.",
+          ],
+        },
+        {
+          target: "nav-inicio",
+          title: "Início, o resumo de tudo",
+          text: [
+            "O Início junta o que importa agora: a contagem até o sim, o progresso geral, a fase em que vocês estão, as próximas tarefas, os próximos pagamentos e os números de convidados e orçamento.",
+            "Quase nada se edita aqui. Ele lê as outras abas e mostra o próximo passo, e cada cartão leva para a aba de onde veio a informação.",
+          ],
+        },
+        {
+          target: "nav-tarefas",
+          title: "Tarefas, o checklist com prazos",
+          text: [
+            "Um checklist brasileiro, montado quando vocês criaram o casamento, com cartório, igreja, fornecedores, convidados e o que vem depois da festa.",
+            "Cada tarefa conta os dias a partir da data do casamento. Se a data mudar, todos os prazos andam juntos. As tarefas ficam agrupadas por fase, de 12 meses antes até depois do casamento.",
+          ],
+        },
+        {
+          target: "adicionar",
+          title: "Adicionar de qualquer lugar",
+          text: [
+            "Atalho para anotar algo sem trocar de aba: tarefa, família de convidados, gasto, ideia, item do enxoval ou fornecedor.",
+            "Gasto e fornecedor aparecem só para quem pode mexer no orçamento, o casal e a assessoria.",
+          ],
+        },
+        {
+          target: "nav-convidados",
+          title: "Convidados, por família",
+          text: [
+            "A lista é organizada por família ou grupo, como os convites de verdade. Cada família tem as pessoas, a idade de cada uma, de quem é o convidado, a lista (A, B ou fora) e o WhatsApp.",
+            "Daqui saem os números que o resto do app usa: quantos são esperados, quantos confirmaram e o custo por convidado no orçamento.",
+          ],
+        },
+        {
+          target: "nav-orcamento",
+          title: "Orçamento, com parcelas",
+          text: [
+            "Cada gasto pertence a uma categoria e pode ter estimativa, valor fechado e parcelas com vencimento.",
+            "O orçamento mostra quanto está comprometido, quanto já foi pago, quanto ainda cabe no valor total e quanto guardar por mês até o casamento.",
+          ],
+        },
+        {
+          target: "mais",
+          title: "O resto fica em Mais",
+          text: [
+            "Fornecedores, Ideias, Músicas, Cortejo, Cronograma, Enxoval, Equipe e Ajustes ficam aqui.",
+            "No celular, pelo ícone de grade no topo do Início. No computador, na barra lateral.",
+          ],
+        },
+        {
+          title: "Como tudo se conecta",
+          text: [
+            "A data do casamento, em Ajustes, define o prazo de cada tarefa, a fase atual, a contagem e quanto guardar por mês.",
+            "Contratar um fornecedor cria um gasto no Orçamento com as parcelas. Elas aparecem em Próximos pagamentos, no Início e no Orçamento, e a categoria passa a contar como fechada no progresso.",
+            "As famílias da lista A formam o custo por convidado, o progresso de respostas e várias conquistas. No Enxoval, um presente recebido pode ser ligado à família que deu, e aparece na ficha dela.",
+            "As músicas marcadas como escolhidas aparecem no Cronograma do dia, para cada momento ter a sua trilha.",
+          ],
+        },
+        {
+          title: "Quem pode fazer o quê",
+          text: [
+            "Casal: pode tudo, inclusive chamar pessoas, mudar papéis e excluir o casamento.",
+            "Assessoria: edita tudo, menos a equipe.",
+            "Ajudante: edita tarefas, convidados, ideias, músicas, cortejo, cronograma e enxoval. Vê orçamento e fornecedores, sem mudar.",
+            "Só leitura: vê tudo e não muda nada. Quem chama as pessoas é o casal, em Equipe, com um link de convite.",
+          ],
+        },
+        {
+          target: "ajuda",
+          title: "Ajuda em cada tela",
+          text: [
+            "Cada aba tem um tour próprio, com o passo a passo dela. Ele abre sozinho na primeira visita.",
+            "Para ver de novo, toquem neste ponto de interrogação. O tour geral também pode ser revisto em Ajustes.",
+          ],
+        },
+      ],
+      doneTitle: "Prontos para começar",
+      doneText:
+        "Comecem pelas próximas tarefas no Início. Ao abrir cada aba pela primeira vez, o tour dela explica os detalhes.",
+    },
+    inicio: {
+      label: "Início",
+      steps: [
+        {
+          target: "inicio-contagem",
+          title: "Contagem até o sim",
+          text: [
+            "Quantos dias faltam e a data do casamento. Se vocês só sabem o mês, aparece previsto para, com o mês, e os prazos contam a partir do dia 1º.",
+            "Sem data, aparece o botão para definir. A data e a frase de vocês mudam em Ajustes, Casamento. A frase aparece aqui, entre aspas.",
+          ],
+        },
+        {
+          target: "inicio-progresso",
+          title: "Progresso geral",
+          text: [
+            "A porcentagem é a média de três partes: tarefas feitas, categorias do orçamento com valor fechado e famílias da lista A que já responderam a presença.",
+            "Uma parte ainda sem dados, como uma lista de convidados vazia, fica de fora da média para não puxar o número para baixo.",
+          ],
+        },
+        {
+          target: "inicio-fase",
+          title: "Fase atual",
+          text: [
+            "O planejamento é dividido em fases pelo tempo que falta: 12 meses ou mais, 9 a 12, 6 a 9, 3 a 6, 1 a 3 meses, últimas semanas, o grande dia e depois.",
+            "O cartão mostra quantas tarefas desta fase estão feitas, avisa se ficou algo aberto de fases anteriores e quando começa a próxima. O link leva direto para essas tarefas.",
+            "Ele só aparece quando o casamento tem data.",
+          ],
+        },
+        {
+          target: "inicio-foco",
+          title: "Próximas tarefas",
+          text: [
+            "As três tarefas abertas com o prazo mais próximo, inclusive as atrasadas. Toquem no círculo para marcar como feita aqui mesmo.",
+            "Tarefas sem prazo só aparecem quando não sobra nenhuma com data.",
+          ],
+        },
+        {
+          target: "inicio-pagamentos",
+          title: "Próximos pagamentos",
+          text: [
+            "As três parcelas não pagas com vencimento mais próximo, de todos os gastos. Toquem em uma para abrir o gasto e marcar como paga.",
+            "As parcelas nascem quando vocês contratam um fornecedor ou criam um gasto com parcelas no Orçamento.",
+          ],
+        },
+        {
+          target: "inicio-convidados",
+          title: "Convidados",
+          text: [
+            "Quantas pessoas são esperadas e quantas confirmaram, contando só a lista A. A barra mostra, entre os convidados, quem disse sim e quem disse não.",
+          ],
+        },
+        {
+          target: "inicio-orcamento",
+          title: "Orçamento",
+          text: [
+            "Quanto já está comprometido em gastos, comparado ao valor total do casamento. A barra fica vermelha se passar do total.",
+            "Comprometido é o valor fechado de cada gasto ou, enquanto ele não fecha, a estimativa.",
+          ],
+        },
+        {
+          target: "inicio-conquistas",
+          title: "Conquistas",
+          text: [
+            "Oito marcos do caminho: data marcada, primeiro fornecedor contratado, lista com 10 famílias, save the date enviado, metade do checklist, convites enviados, metade confirmou e tudo pago.",
+            "Elas acontecem sozinhas, conforme vocês usam as outras abas. Cada marco novo ganha uma comemoração.",
+          ],
+        },
+      ],
+      doneTitle: "Esse é o Início",
+      doneText:
+        "Ele se atualiza com o que vocês fazem nas outras abas. Voltem sempre que quiserem saber o próximo passo.",
+    },
+    tarefas: {
+      label: "Tarefas",
+      steps: [
+        {
+          target: "tarefas-progresso",
+          title: "Quanto já foi feito",
+          text: [
+            "Tarefas feitas sobre o total do checklist, inclusive as que vocês criaram.",
+          ],
+        },
+        {
+          target: "tarefas-filtros",
+          title: "Filtros",
+          text: [
+            "A fazer mostra só o que está aberto. Minhas mostra o que foi atribuído a você, feito ou não. Todas mostra o checklist inteiro, com o que já foi concluído.",
+          ],
+        },
+        {
+          target: "tarefas-fase",
+          title: "Fases",
+          text: [
+            "As tarefas ficam agrupadas pela fase do prazo, da mais distante até depois do casamento. O número ao lado mostra feitas sobre o total da fase.",
+            "O cartão Fase atual, no Início, leva direto para a fase certa.",
+          ],
+        },
+        {
+          target: "tarefas-item",
+          title: "Cada tarefa",
+          text: [
+            "Toquem no círculo para marcar como feita e no texto para abrir e editar.",
+            "O selo mostra o prazo: Atrasada, Em breve (até 30 dias), No prazo ou Sem prazo. O selo Prazo importante marca regras legais, como a habilitação no cartório, que vale só 90 dias, e o curso de noivos. Abrindo a tarefa, a regra aparece explicada.",
+          ],
+        },
+        {
+          title: "Prazo relativo ou data fixa",
+          text: [
+            "Ao criar ou editar, escolham Antes do casamento, por exemplo 80 dias antes, ou uma Data fixa.",
+            "Prazos relativos andam junto com a data do casamento: se ela mudar em Ajustes, todos se ajustam. Datas fixas ficam onde estão, bom para uma prova já marcada.",
+          ],
+        },
+        {
+          title: "Quem cuida e fornecedor",
+          text: [
+            "Cada tarefa pode ter um responsável da equipe ou o nome de outra pessoa, como a mãe ou a madrinha. Quem é da equipe encontra as suas no filtro Minhas.",
+            "Também dá para ligar a tarefa a um fornecedor, para lembrar com quem tratar. Ao excluir uma tarefa, aparece Desfazer por alguns segundos.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Nova tarefa",
+          text: [
+            "Criem tarefas próprias por aqui ou pelo botão de adicionar. O checklist sugerido é só o começo: editem ou excluam o que não fizer sentido para vocês.",
+          ],
+        },
+      ],
+      doneTitle: "Tarefas em dia",
+      doneText:
+        "Quando a data for confirmada, mudem em Ajustes, e todos os prazos se reorganizam sozinhos.",
+    },
+    orcamento: {
+      label: "Orçamento",
+      steps: [
+        {
+          target: "orcamento-resumo",
+          title: "O resumo",
+          text: [
+            "O gráfico mostra como o dinheiro comprometido se divide entre as maiores categorias.",
+            "Ao lado ficam o orçamento total, o que já foi pago, o que falta pagar, quanto ainda cabe, a reserva para imprevistos e o custo por convidado.",
+            "Ainda cabe é o total, menos a reserva, menos o comprometido. O lápis leva a Ajustes para mudar o total e a reserva.",
+          ],
+        },
+        {
+          target: "orcamento-mensal",
+          title: "Quanto guardar por mês",
+          text: [
+            "Divide o que falta pagar pelos meses até o casamento, contando o mês atual, arredondado para cima. Aparece quando há data e algo a pagar.",
+          ],
+        },
+        {
+          target: "orcamento-pagamentos",
+          title: "Próximos pagamentos",
+          text: [
+            "As cinco parcelas abertas com vencimento mais próximo. Toquem em uma para abrir o gasto e marcar como paga.",
+            "Dica do Procon: deixem uma parcela para depois da entrega do serviço.",
+          ],
+        },
+        {
+          target: "orcamento-categorias",
+          title: "Categorias",
+          text: [
+            "Cada categoria tem um valor previsto, sugerido na criação do casamento a partir do total, com mais peso nas prioridades que vocês escolheram.",
+            "A barra compara o comprometido com o previsto e avisa quando passou. Mudar o total depois não refaz o previsto de cada categoria: ajustem pelo lápis dentro dela.",
+          ],
+        },
+        {
+          target: "orcamento-categoria",
+          title: "Dentro da categoria",
+          text: [
+            "Abrindo uma categoria, vocês veem previsto, comprometido, pago e todos os gastos dela, e podem criar um gasto já nela.",
+            "Uma categoria só pode ser excluída quando não tem gastos.",
+          ],
+        },
+        {
+          title: "Estimativa, valor fechado e pago",
+          text: [
+            "Cada gasto tem uma estimativa, quanto vocês acham que vai custar, e um valor fechado, o preço combinado. O comprometido usa o valor fechado quando ele existe.",
+            "Pago é a soma das parcelas marcadas como pagas. Uma categoria com algum valor fechado conta no progresso do Início.",
+          ],
+        },
+        {
+          title: "Parcelas",
+          text: [
+            "Ao criar um gasto, escolham quantas parcelas e o primeiro vencimento. As parcelas são mensais, e a primeira fica com os centavos que sobram da divisão.",
+            "Dentro do gasto, cada parcela tem vencimento, forma de pagamento e observação. Um toque marca como paga, e ela sai dos próximos pagamentos.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Novo gasto",
+          text: [
+            "Anotem gastos por aqui. Para fornecedores, prefiram o botão Contratar na ficha deles: ele cria o gasto, as parcelas e liga tudo ao fornecedor.",
+            "Só o casal e a assessoria editam o orçamento. Ajudantes veem tudo, sem mudar.",
+          ],
+        },
+      ],
+      doneTitle: "Orçamento sob controle",
+      doneText: "O valor total e a reserva ficam em Ajustes, Casamento.",
+    },
+    fornecedores: {
+      label: "Fornecedores",
+      steps: [
+        {
+          target: "vazio",
+          title: "Comecem por aqui",
+          text: [
+            "Anotem cada fornecedor que estão pesquisando, mesmo antes de pedir orçamento. Depois dá para comparar e contratar.",
+          ],
+        },
+        {
+          target: "fornecedores-quadro",
+          title: "O funil",
+          text: [
+            "Os fornecedores andam por etapas: Pesquisando, Orçado, Visita marcada, Favorito, Contratado e Descartado. Arrastem para o lado para ver todas as colunas.",
+            "No computador dá para arrastar os cartões entre as colunas. No celular, usem o seletor Mover para, em cada cartão.",
+          ],
+        },
+        {
+          target: "fornecedores-card",
+          title: "Cada fornecedor",
+          text: [
+            "O cartão mostra categoria, orçamento e nota. Toquem no nome para abrir a ficha com contato, WhatsApp, Instagram, site, capacidade, visita e o que inclui.",
+            "Atenção: mover para Contratado só muda a etapa. Para o dinheiro ir ao Orçamento, usem Contratar na ficha.",
+          ],
+        },
+        {
+          target: "fornecedores-comparar",
+          title: "Comparar lado a lado",
+          text: [
+            "Escolham uma categoria e vejam os orçamentos lado a lado. O menor preço ganha destaque, e o campo O que inclui vira uma lista para comparar item por item.",
+            "Cada cartão tem o botão Contratar, que leva direto à ficha.",
+          ],
+        },
+        {
+          title: "Contratar",
+          text: [
+            "Na ficha, o painel Contratar pede o valor fechado, a categoria, o número de parcelas e o primeiro vencimento.",
+            "Ao confirmar, o fornecedor vai para Contratado, nasce um gasto no Orçamento com as parcelas, os vencimentos entram em Próximos pagamentos e vocês ganham a conquista do primeiro fornecedor.",
+            "Depois, a ficha mostra Ver no orçamento, que abre esse gasto.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Novo fornecedor",
+          text: [
+            "Cadastrem nome, categoria, etapa e orçamento. Telefone com DDD vira botão de WhatsApp na ficha.",
+            "Só o casal e a assessoria editam fornecedores.",
+          ],
+        },
+      ],
+      doneTitle: "Fornecedores organizados",
+      doneText:
+        "Excluir um fornecedor não apaga o gasto dele no orçamento, só desfaz a ligação.",
+    },
+    convidados: {
+      label: "Convidados",
+      steps: [
+        {
+          target: "vazio",
+          title: "Comecem a lista",
+          text: [
+            "Adicionem uma família de cada vez ou colem uma lista inteira de nomes, copiada do bloco de notas, por exemplo. As famílias coladas vão para a triagem.",
+          ],
+        },
+        {
+          target: "convidados-triagem",
+          title: "Triagem",
+          text: [
+            "As famílias em A decidir esperam aqui. Vocês veem uma por vez, respondem quatro perguntas rápidas e decidem: Lista A, Lista B ou Não convidar.",
+            "Dá para arrastar o cartão para a direita (Lista A) ou para a esquerda (Não convidar), ou usar as teclas A, B e N no computador.",
+          ],
+        },
+        {
+          target: "convidados-funil",
+          title: "Caminho até o sim",
+          text: [
+            "Quantas famílias da lista A estão na lista, receberam o save the date, receberam o convite e já responderam.",
+            "Save the date e convite se marcam na ficha de cada família, e o dia fica registrado.",
+          ],
+        },
+        {
+          target: "convidados-numeros",
+          title: "Os números",
+          text: [
+            "Esperados é a lista A menos quem disse que não vai. Também aparecem confirmados, quem não vai, a divisão por lado e por idade, útil porque o buffet costuma cobrar criança diferente.",
+            "Os esperados viram o custo por convidado no Orçamento e o progresso do Início.",
+          ],
+        },
+        {
+          target: "convidados-colar",
+          title: "Colar uma lista",
+          text: [
+            "Uma família por linha, com as pessoas separadas por vírgula ou pela palavra e. Vocês veem a prévia antes de adicionar, e tudo vai para a triagem.",
+          ],
+        },
+        {
+          target: "convidados-busca",
+          title: "Busca",
+          text: [
+            "Procurem pelo nome da família ou de qualquer pessoa, com ou sem acento.",
+          ],
+        },
+        {
+          target: "convidados-filtros",
+          title: "Listas",
+          text: [
+            "Lista A são os convidados certos, e é a única que entra nas contas. Sem resposta mostra famílias da lista A com alguém pendente. Lista B é a reserva, para chamar se sobrar lugar. Fora são os que vocês decidiram não chamar.",
+            "Famílias em A decidir não aparecem aqui, só na triagem.",
+          ],
+        },
+        {
+          target: "convidados-familia",
+          title: "Cada família",
+          text: [
+            "Mostra as pessoas e a presença de cada uma. O botão verde abre o WhatsApp com a mensagem certa para o momento: primeiro o save the date, depois o convite, depois o lembrete para confirmar.",
+            "Na ficha da família vocês marcam a presença de cada pessoa, mandam mensagens, anotam presente e agradecimento e veem os itens do enxoval que ela deu.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Nova família",
+          text: [
+            "Cada família tem nome, pessoas com idade e restrição alimentar, de quem é o convidado, a lista, WhatsApp e endereço. Acompanhante entra como pessoa extra.",
+            "Ajudantes também podem cuidar dos convidados.",
+          ],
+        },
+      ],
+      doneTitle: "Lista pronta para crescer",
+      doneText:
+        "Para registrar presenças, abram a família e toquem em Vai ou Não vai para cada pessoa.",
+    },
+    mais: {
+      label: "Mais",
+      steps: [
+        {
+          target: "mais-lista",
+          title: "O que não cabe na barra",
+          text: [
+            "Fornecedores: o funil, a comparação e a contratação. Ideias: o moodboard. Músicas: uma para cada momento.",
+            "Cortejo: quem entra e em que ordem. Cronograma: o roteiro do dia. Enxoval: a casa nova.",
+            "Equipe: quem planeja com vocês. Ajustes: o casamento e a conta. Cada uma tem o seu tour, que abre na primeira visita.",
+          ],
+        },
+      ],
+      doneTitle: "Explorem à vontade",
+      doneText:
+        "O ponto de interrogação no topo de cada tela reabre o tour dela.",
+    },
+    equipe: {
+      label: "Equipe",
+      steps: [
+        {
+          target: "equipe-membros",
+          title: "Quem está no casamento",
+          text: [
+            "Todas as pessoas com acesso e o papel de cada uma. O casal pode mudar papéis ou remover alguém. O casamento precisa ter pelo menos uma pessoa do casal.",
+          ],
+        },
+        {
+          target: "equipe-convidar",
+          title: "Chamar alguém",
+          text: [
+            "Escolham o papel e criem um link de convite. Mandem pelo WhatsApp ou copiem. O link vale por 14 dias e serve para uma pessoa só, então criem um para cada.",
+            "Casal pode tudo. Assessoria edita tudo, menos a equipe. Ajudante edita tarefas, convidados, ideias, músicas, cortejo, cronograma e enxoval. Só leitura vê sem mudar.",
+          ],
+        },
+        {
+          target: "equipe-convites",
+          title: "Convites ativos",
+          text: [
+            "Links ainda não usados, com a validade de cada um. Cancelem o link se mandaram para a pessoa errada.",
+          ],
+        },
+        {
+          title: "Todos no mesmo casamento",
+          text: [
+            "Cada pessoa da equipe vê os mesmos dados. O que uma marca aparece para as outras ao abrir ou atualizar a tela.",
+            "Quem participa de mais de um casamento, como uma assessoria, troca entre eles em Ajustes, Casamento.",
+          ],
+        },
+      ],
+      doneTitle: "Planejem juntos",
+      doneText: "Quem aceita o convite entra direto neste casamento.",
+    },
+    ideias: {
+      label: "Ideias",
+      steps: [
+        {
+          target: "vazio",
+          title: "O moodboard",
+          text: [
+            "Guardem fotos e links do Pinterest ou do Instagram, separados por quadro: decoração, papelaria, bolo, vestido, fotos e outros.",
+          ],
+        },
+        {
+          target: "ideias-aprovadas",
+          title: "Total aprovado",
+          text: [
+            "Soma a estimativa de custo das ideias aprovadas. É uma referência: esse valor não entra sozinho no orçamento. Quando decidirem, criem o gasto no Orçamento.",
+          ],
+        },
+        {
+          target: "ideias-quadros",
+          title: "Quadros",
+          text: [
+            "Filtrem por quadro. O número mostra quantas ideias ativas cada um tem, sem contar as descartadas.",
+          ],
+        },
+        {
+          target: "ideias-grade",
+          title: "As ideias",
+          text: [
+            "Cada cartão mostra foto, título e situação: Ideia, Aprovada com o valor, ou Descartada, que fica mais apagada. O botão de link abre a referência original.",
+            "Toquem no cartão para editar, trocar a foto ou ligar a ideia a um fornecedor.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Nova ideia",
+          text: [
+            "Adicionem uma foto do celular, que é reduzida e guardada só para o casamento de vocês, um link, o quadro, quanto deve custar e a situação.",
+          ],
+        },
+      ],
+      doneTitle: "Inspiração guardada",
+      doneText:
+        "Aprovem o que amarem e descartem o resto, sem precisar apagar.",
+    },
+    musicas: {
+      label: "Músicas",
+      steps: [
+        {
+          target: "musicas-progresso",
+          title: "Momentos com música",
+          text: [
+            "Conta quantos dos 10 momentos da cerimônia já têm uma música escolhida.",
+          ],
+        },
+        {
+          target: "musicas-cerimonia",
+          title: "Cerimônia",
+          text: [
+            "Um cartão para cada momento, da entrada dos padrinhos à saída de vocês. Cada momento pode ter várias opções, e a escolhida ganha a estrela.",
+          ],
+        },
+        {
+          target: "musicas-momento",
+          title: "Cada momento",
+          text: [
+            "O botão de mais adiciona uma música, com artista e link do Spotify ou do YouTube. Sem link, aparece um atalho para buscar no Spotify.",
+            "A estrela marca a escolhida. Na maioria dos momentos só uma fica escolhida. Na pista de dança e em Não tocar, vocês podem marcar várias.",
+          ],
+        },
+        {
+          target: "musicas-festa",
+          title: "Festa",
+          text: [
+            "Os momentos da festa, como a primeira dança, a pista e a lista do que o DJ não deve tocar.",
+          ],
+        },
+        {
+          title: "Ligação com o Cronograma",
+          text: [
+            "As músicas escolhidas aparecem no Cronograma do dia, para ligar cada momento do roteiro à sua música. Excluir uma música tira a ligação do cronograma.",
+          ],
+        },
+      ],
+      doneTitle: "Trilha sonora a caminho",
+      doneText: "Mandem os links das escolhidas para a banda ou o DJ.",
+    },
+    cortejo: {
+      label: "Cortejo",
+      steps: [
+        {
+          target: "vazio",
+          title: "Quem entra com vocês",
+          text: [
+            "Adicionem padrinhos, madrinhas, pais, damas, pajens e quem leva as alianças.",
+          ],
+        },
+        {
+          target: "cortejo-convites",
+          title: "Convite caixinha",
+          text: [
+            "Quantas pessoas já receberam o convite para ser padrinho ou madrinha. Cada uma tem a situação Convite a fazer, Encomendado ou Entregue.",
+          ],
+        },
+        {
+          target: "cortejo-corredor",
+          title: "O corredor",
+          text: [
+            "A fila vai da entrada, embaixo, até o altar, no topo. Cada linha é uma dupla que entra junta, e o número mostra a ordem de entrada. Cada um fica do lado de quem convidou.",
+            "Os cartões mostram papel, traje ou cor e a situação do convite. O lápis abre a edição.",
+          ],
+        },
+        {
+          target: "cortejo-mover",
+          title: "Mudar a ordem",
+          text: [
+            "As setas sobem ou descem a dupla inteira na fila. Funcionam no toque e no teclado.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Adicionar pessoa",
+          text: [
+            "Informem nome, papel, lado e com quem entra. Ao escolher o par, a ligação vale para os dois.",
+          ],
+        },
+      ],
+      doneTitle: "Cortejo montado",
+      doneText:
+        "O cortejo é separado da lista de convidados: quem for padrinho também precisa estar na família dele em Convidados.",
+    },
+    cronograma: {
+      label: "Cronograma",
+      steps: [
+        {
+          target: "vazio",
+          title: "O roteiro do dia",
+          text: [
+            "Montem o dia hora a hora: dia da noiva, fotos, cerimônia, recepção e festa.",
+          ],
+        },
+        {
+          target: "cronograma-linha",
+          title: "Linha do tempo",
+          text: [
+            "Os momentos ficam em ordem de horário, com local, quem cuida e a música ligada.",
+            "Se um momento começa antes do anterior terminar, aparece Horário em conflito. No dia do casamento, o momento atual ganha a marca Agora.",
+          ],
+        },
+        {
+          target: "cronograma-whatsapp",
+          title: "Compartilhar",
+          text: [
+            "Manda o roteiro inteiro em texto pelo WhatsApp, bom para assessoria, fornecedores e padrinhos.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Adicionar momento",
+          text: [
+            "Informem início, fim, o que acontece, onde e quem cuida. O próximo momento já vem sugerido para começar no fim do anterior.",
+            "O campo Música lista só as músicas marcadas como escolhidas na aba Músicas.",
+          ],
+        },
+      ],
+      doneTitle: "Dia planejado",
+      doneText: "Revisem o cronograma com os fornecedores nas últimas semanas.",
+    },
+    enxoval: {
+      label: "Enxoval",
+      steps: [
+        {
+          target: "vazio",
+          title: "Comecem pela lista sugerida",
+          text: [
+            "Usem a lista sugerida, com mais de cem itens separados por cômodo, ou colem a planilha que vocês já têm, do Google Sheets ou do Excel.",
+          ],
+        },
+        {
+          target: "enxoval-resumo",
+          title: "Resumo",
+          text: [
+            "Quantos itens já estão resolvidos, comprados ou ganhos, quanto tudo deve custar, quanto falta comprar e quanto já gastaram.",
+            "O selo avisa quantos itens marcados para a mudança ainda faltam. O dinheiro do enxoval é separado do orçamento do casamento.",
+          ],
+        },
+        {
+          target: "enxoval-comodos",
+          title: "Cômodos",
+          text: [
+            "Filtrem por cômodo. O número mostra resolvidos sobre o total.",
+          ],
+        },
+        {
+          target: "enxoval-situacao",
+          title: "Situação",
+          text: [
+            "Falta, Pedir de presente, Comprado ou Ganhamos. Combinem com o filtro de cômodo, por exemplo, para ver o que falta na cozinha.",
+          ],
+        },
+        {
+          target: "enxoval-item",
+          title: "Cada item",
+          text: [
+            "Quantidade, prioridade, preço, loja e link. A estrela marca os itens para a mudança. O seletor muda a situação na hora.",
+            "Quando a situação é Ganhamos, vocês podem dizer qual família deu. O presente aparece na ficha dela em Convidados, para lembrar do agradecimento.",
+          ],
+        },
+        {
+          target: "enxoval-colar",
+          title: "Colar da planilha",
+          text: [
+            "Copiem as linhas da planilha e colem. Cômodo, quantidade, preço e se já compraram ou ganharam são reconhecidos. Itens com nome repetido são ignorados.",
+          ],
+        },
+        {
+          target: "novo",
+          title: "Novo item",
+          text: [
+            "Adicionem um item com cômodo, quantidade, prioridade, situação, preço, loja e link.",
+          ],
+        },
+      ],
+      doneTitle: "Casa nova encaminhada",
+      doneText:
+        "Marquem Pedir de presente no que querem ganhar e usem como lista.",
+    },
+    ajustes: {
+      label: "Ajustes",
+      steps: [
+        {
+          target: "ajustes-casamento",
+          title: "Casamento e equipe",
+          text: [
+            "Em Casamento ficam os nomes, a data, a cidade, a cerimônia, os convidados estimados, o valor total, a reserva e a frase de vocês. Equipe leva a quem planeja junto.",
+          ],
+        },
+        {
+          title: "O que cada ajuste muda",
+          text: [
+            "Data: muda a contagem, a fase atual, o prazo das tarefas relativas, quanto guardar por mês e as mensagens de WhatsApp. Se ainda é uma previsão, marquem a opção, e o app mostra só o mês.",
+            "Valor total e reserva: mudam o Ainda cabe e a barra do Início. O previsto de cada categoria não é refeito.",
+            "Convidados estimados: entram no custo por convidado enquanto a lista A está vazia. Frase: aparece no Início.",
+            "Cerimônia: define as tarefas de igreja só na criação. Mudar depois não adiciona nem remove tarefas.",
+          ],
+        },
+        {
+          target: "ajustes-conta",
+          title: "Conta e dados",
+          text: [
+            "Em Conta, troquem a senha, saiam de todos os aparelhos ou excluam a conta. Em Exportar dados, baixem convidados, tarefas, gastos e fornecedores em planilhas.",
+            "Em Casamento também dá para trocar de casamento, criar outro, sair deste ou excluí-lo.",
+          ],
+        },
+        {
+          target: "ajustes-tours",
+          title: "Rever os tours",
+          text: [
+            "Revejam o tour geral quando quiserem, ou façam os tours de cada aba aparecerem de novo.",
+          ],
+        },
+      ],
+      doneTitle: "Tudo ajustado",
+      doneText: "Mudanças aqui valem para toda a equipe.",
+    },
   },
   ceremonies: {
     civil: "Só no civil",
@@ -103,7 +861,7 @@ export const m = {
     progress: "Preparativos",
     progressValue: (percent: number) => `${percent}% pronto`,
     progressParts:
-      "Calculado com tarefas feitas, fornecedores contratados e convidados que responderam.",
+      "Calculado com tarefas feitas, categorias do orçamento com valor fechado e famílias da lista A que responderam.",
     phase: "Fase atual",
     phaseTasks: (done: number, total: number) =>
       `${done} de ${plural(total, "tarefa feita", "tarefas feitas")}`,
@@ -121,7 +879,7 @@ export const m = {
             : `em ${days} dias`
       }`,
     phaseMore: "Ver tarefas da fase",
-    focus: "Foco da semana",
+    focus: "Próximas tarefas",
     focusEmpty: "Nada urgente. Aproveitem!",
     focusMore: "Ver todas as tarefas",
     payments: "Próximos pagamentos",

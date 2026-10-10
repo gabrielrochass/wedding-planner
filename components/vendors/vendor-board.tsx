@@ -57,7 +57,10 @@ export function VendorBoard({
   }
 
   return (
-    <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6">
+    <div
+      data-tour="fornecedores-quadro"
+      className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-4 sm:-mx-6 sm:px-6"
+    >
       {vendorStatuses.map((status) => {
         const column = items.filter((vendor) => vendor.status === status);
         return (
@@ -106,6 +109,7 @@ export function VendorBoard({
                 {column.map((vendor) => (
                   <li
                     key={vendor.id}
+                    data-tour="fornecedores-card"
                     draggable={editable}
                     onDragStart={(event) => {
                       event.dataTransfer.effectAllowed = "move";

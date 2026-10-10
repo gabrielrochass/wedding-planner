@@ -31,6 +31,7 @@ export function GuestSummary({
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <section
+        data-tour="convidados-funil"
         aria-labelledby="funil"
         className="flex flex-col gap-3 rounded-2xl bg-card p-4"
       >
@@ -59,6 +60,7 @@ export function GuestSummary({
       </section>
 
       <section
+        data-tour="convidados-numeros"
         aria-labelledby="numeros"
         className="flex flex-col gap-4 rounded-2xl bg-card p-4"
       >

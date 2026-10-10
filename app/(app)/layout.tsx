@@ -1,12 +1,15 @@
+import { Suspense } from "react";
 import { SideNav } from "@/components/app-shell/side-nav";
 import { TabBar } from "@/components/app-shell/tab-bar";
+import { Tour } from "@/components/onboarding/tour";
 import { m } from "@/lib/i18n";
-import { canHelp } from "@/lib/roles";
+import { canEdit, canHelp } from "@/lib/roles";
 import { requireWedding } from "@/lib/supabase/server";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const { wedding, role } = await requireWedding();
+  const { wedding, role, toursSeen } = await requireWedding();
   const canAdd = canHelp(role);
+  const editor = canEdit(role);
 
   return (
     <>
@@ -14,6 +17,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <SideNav
           couple={m.home.couple(wedding.partner_a, wedding.partner_b)}
           canAdd={canAdd}
+          canEdit={editor}
         />
         <main
           id="conteudo"
@@ -23,7 +27,10 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
           {children}
         </main>
       </div>
-      <TabBar canAdd={canAdd} />
+      <TabBar canAdd={canAdd} canEdit={editor} />
+      <Suspense>
+        <Tour seen={toursSeen} />
+      </Suspense>
     </>
   );
 }

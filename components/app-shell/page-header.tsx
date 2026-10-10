@@ -1,6 +1,7 @@
 import { ChevronLeftIcon } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+import { TourButton } from "@/components/onboarding/tour-button";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { moreNav } from "./nav-items";
@@ -30,19 +31,23 @@ export function PageHeader({
         <h1 className="min-w-0 text-large-title font-bold tracking-tight">
           {title}
         </h1>
-        {action}
-        {!back && !action && (
-          <Link
-            href={moreNav.href}
-            aria-label={moreNav.label}
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "icon-lg" }),
-              "md:hidden",
-            )}
-          >
-            <MoreIcon aria-hidden="true" className="size-6" />
-          </Link>
-        )}
+        <div className="flex shrink-0 items-center gap-1">
+          <TourButton />
+          {action && <div data-tour="novo">{action}</div>}
+          {!back && !action && (
+            <Link
+              href={moreNav.href}
+              aria-label={moreNav.label}
+              data-tour="mais"
+              className={cn(
+                buttonVariants({ variant: "ghost", size: "icon-lg" }),
+                "md:hidden",
+              )}
+            >
+              <MoreIcon aria-hidden="true" className="size-6" />
+            </Link>
+          )}
+        </div>
       </div>
     </header>
   );

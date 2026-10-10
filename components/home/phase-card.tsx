@@ -13,6 +13,7 @@ export function PhaseCard({
 
   return (
     <section
+      data-tour="inicio-fase"
       aria-labelledby="fase-atual"
       className="flex min-w-0 flex-col gap-4 rounded-2xl bg-card p-4 sm:p-5"
     >

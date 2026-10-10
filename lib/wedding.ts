@@ -52,7 +52,6 @@ export function phaseStatus(
     }
   }
   const next = datedPhases[position + 1] ?? null;
-  const nextStart = next ? phaseStart(next) : null;
   const days = daysBetween(today, weddingDate);
   return {
     current,
@@ -60,8 +59,7 @@ export function phaseStatus(
     total,
     behind,
     next,
-    nextIn:
-      next === null ? null : nextStart === null ? days + 1 : days - nextStart,
+    nextIn: next === null ? null : days - (phaseStart(current) ?? 0) + 1,
   };
 }
 

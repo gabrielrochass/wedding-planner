@@ -69,11 +69,15 @@ export default async function IdeasPage({
       <div className="flex flex-col gap-6">
         <p className="text-body text-muted-foreground">{m.ideas.intro}</p>
         {approved > 0 && (
-          <p className="w-fit rounded-full bg-blush px-4 py-2 text-subhead font-semibold text-link tabular-nums">
+          <p
+            data-tour="ideias-aprovadas"
+            className="w-fit rounded-full bg-blush px-4 py-2 text-subhead font-semibold text-link tabular-nums"
+          >
             {m.ideas.approvedTotal(formatWholeBRL(approved))}
           </p>
         )}
         <nav
+          data-tour="ideias-quadros"
           aria-label={m.ideas.board}
           className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
         >
@@ -116,7 +120,7 @@ export default async function IdeasPage({
             }
           />
         ) : (
-          <ul className="columns-2 gap-3 sm:columns-3">
+          <ul data-tour="ideias-grade" className="columns-2 gap-3 sm:columns-3">
             {visible.map((idea, index) => (
               <li key={idea.id} className="mb-3 break-inside-avoid">
                 <article

@@ -129,7 +129,10 @@ export default async function BudgetPage() {
         }
       />
       <div className="flex flex-col gap-8">
-        <section className="flex flex-col gap-5 rounded-3xl bg-card p-5 sm:flex-row sm:items-center sm:gap-8">
+        <section
+          data-tour="orcamento-resumo"
+          className="flex flex-col gap-5 rounded-3xl bg-card p-5 sm:flex-row sm:items-center sm:gap-8"
+        >
           <BudgetDonut
             slices={slices}
             total={total.committed}
@@ -183,7 +186,10 @@ export default async function BudgetPage() {
               <Figure label={m.budget.perGuest} cents={costPerGuest} />
             )}
             {saving !== null && (
-              <div className="col-span-2 rounded-xl bg-blush px-3 py-2">
+              <div
+                data-tour="orcamento-mensal"
+                className="col-span-2 rounded-xl bg-blush px-3 py-2"
+              >
                 <dt className="text-footnote text-muted-foreground">
                   {m.budget.saveMonthly}
                 </dt>
@@ -201,7 +207,11 @@ export default async function BudgetPage() {
         )}
 
         {next.length > 0 && (
-          <section aria-labelledby="pagamentos" className="flex flex-col gap-3">
+          <section
+            data-tour="orcamento-pagamentos"
+            aria-labelledby="pagamentos"
+            className="flex flex-col gap-3"
+          >
             <h2 id="pagamentos" className="text-headline font-semibold">
               {m.home.payments}
             </h2>
@@ -236,7 +246,11 @@ export default async function BudgetPage() {
           </section>
         )}
 
-        <section aria-labelledby="categorias" className="flex flex-col gap-3">
+        <section
+          data-tour="orcamento-categorias"
+          aria-labelledby="categorias"
+          className="flex flex-col gap-3"
+        >
           <div className="flex items-center justify-between gap-3">
             <h2 id="categorias" className="text-headline font-semibold">
               {m.budget.categories}
@@ -266,7 +280,7 @@ export default async function BudgetPage() {
                 const over = planned > 0 && committed > planned;
                 const Icon = categoryIcon(category.icon);
                 return (
-                  <li key={category.id}>
+                  <li key={category.id} data-tour="orcamento-categoria">
                     <Link
                       href={`/orcamento/categorias/${category.id}` as Route}
                       className="flex min-h-16 items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/60"

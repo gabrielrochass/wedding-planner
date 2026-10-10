@@ -40,6 +40,7 @@ export function InviteLink({ couple }: { couple: string }) {
 
   return (
     <section
+      data-tour="equipe-convidar"
       aria-labelledby="convidar"
       className="flex flex-col gap-4 rounded-2xl bg-card p-5"
     >

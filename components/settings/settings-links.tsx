@@ -12,9 +12,18 @@ export type SettingsLink = {
   color?: string;
 };
 
-export function SettingsLinks({ links }: { links: readonly SettingsLink[] }) {
+export function SettingsLinks({
+  links,
+  tour,
+}: {
+  links: readonly SettingsLink[];
+  tour?: string;
+}) {
   return (
-    <ul className="divide-y overflow-hidden rounded-2xl bg-card">
+    <ul
+      data-tour={tour}
+      className="divide-y overflow-hidden rounded-2xl bg-card"
+    >
       {links.map(({ href, title, hint, icon: Icon, color }) => (
         <li key={href}>
           <Link

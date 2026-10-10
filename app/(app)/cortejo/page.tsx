@@ -121,14 +121,20 @@ export default async function PartyPage() {
           />
         ) : (
           <>
-            <p className="text-subhead tabular-nums">
+            <p
+              data-tour="cortejo-convites"
+              className="text-subhead tabular-nums"
+            >
               {m.party.invitesDone(delivered, members.length)}
             </p>
             <div className="flex items-center justify-between px-2 text-footnote font-medium text-muted-foreground">
               <span>{m.guests.sideOf(partners.a)}</span>
               <span>{m.guests.sideOf(partners.b)}</span>
             </div>
-            <ol className="relative flex flex-col gap-3">
+            <ol
+              data-tour="cortejo-corredor"
+              className="relative flex flex-col gap-3"
+            >
               <li className="flex flex-col items-center gap-1 pb-2">
                 <span className="flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
                   <ChurchIcon aria-hidden="true" className="size-6" />
@@ -170,7 +176,10 @@ export default async function PartyPage() {
                       )}
                     </div>
                     {editable && rows.length > 1 && (
-                      <div className="flex justify-center">
+                      <div
+                        data-tour="cortejo-mover"
+                        className="flex justify-center"
+                      >
                         <MoveButtons
                           id={first.id}
                           name={first.name}

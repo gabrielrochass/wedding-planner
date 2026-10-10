@@ -3,6 +3,7 @@ import { expect, type Page, type TestInfo, test } from "@playwright/test";
 import { createClient } from "@supabase/supabase-js";
 import { expectNoAxeViolations } from "./axe";
 import "./env";
+import { tourIds } from "../lib/tour";
 
 const password = "dev-only-local-password";
 const options = { auth: { persistSession: false, autoRefreshToken: false } };
@@ -46,6 +47,11 @@ async function createPerson(email: string) {
       p_tasks: [],
       p_categories: [],
     })
+    .throwOnError();
+  await client
+    .from("profiles")
+    .update({ tours_seen: [...tourIds] })
+    .eq("id", data.user.id)
     .throwOnError();
   return data.user.id;
 }
@@ -185,6 +191,11 @@ test("a new person answers one question at a time and lands ready", async ({
     ).toBeVisible();
 
     const client = await personClient(email, secret);
+    await client
+      .from("profiles")
+      .update({ tours_seen: [...tourIds] })
+      .not("id", "is", null)
+      .throwOnError();
     const { count } = await client
       .from("tasks")
       .select("id", { count: "exact", head: true })

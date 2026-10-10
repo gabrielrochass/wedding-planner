@@ -113,7 +113,10 @@ export default async function HomeItemsPage({
           />
         ) : (
           <>
-            <section className="flex items-center gap-5 rounded-3xl bg-linear-to-br from-blush via-card to-card p-5">
+            <section
+              data-tour="enxoval-resumo"
+              className="flex items-center gap-5 rounded-3xl bg-linear-to-br from-blush via-card to-card p-5"
+            >
               <ProgressRing
                 value={summary.total ? summary.done / summary.total : 0}
                 label={m.enxoval.progress(summary.done, summary.total)}
@@ -142,6 +145,7 @@ export default async function HomeItemsPage({
             )}
 
             <nav
+              data-tour="enxoval-comodos"
               aria-label={m.enxoval.room}
               className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
             >
@@ -171,6 +175,7 @@ export default async function HomeItemsPage({
               })}
             </nav>
             <nav
+              data-tour="enxoval-situacao"
               aria-label={m.enxoval.statusFilter}
               className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1"
             >
@@ -199,6 +204,7 @@ export default async function HomeItemsPage({
             {editable && (
               <Link
                 href="/enxoval/colar"
+                data-tour="enxoval-colar"
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "lg" }),
                   "w-fit",
@@ -239,6 +245,7 @@ export default async function HomeItemsPage({
                     return (
                       <li
                         key={item.id}
+                        data-tour="enxoval-item"
                         className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3"
                       >
                         <div className="flex min-w-0 flex-1 flex-col">

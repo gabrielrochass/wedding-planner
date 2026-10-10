@@ -25,7 +25,10 @@ export default async function TeamPage() {
       <PageHeader title={m.team.title} />
       <div className="flex flex-col gap-8">
         <p className="text-body text-muted-foreground">{m.team.intro}</p>
-        <ul className="divide-y overflow-hidden rounded-2xl bg-card">
+        <ul
+          data-tour="equipe-membros"
+          className="divide-y overflow-hidden rounded-2xl bg-card"
+        >
           {people.map((person) => {
             const name = person.display_name ?? m.team.unnamed;
             return (
@@ -69,7 +72,11 @@ export default async function TeamPage() {
         )}
 
         {invites.length > 0 && (
-          <section aria-labelledby="convites" className="flex flex-col gap-3">
+          <section
+            data-tour="equipe-convites"
+            aria-labelledby="convites"
+            className="flex flex-col gap-3"
+          >
             <h2 id="convites" className="text-headline font-semibold">
               {m.team.pendingInvites}
             </h2>

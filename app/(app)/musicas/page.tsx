@@ -37,6 +37,7 @@ function Moment({
   const chosen = list.find((song) => song.chosen);
   return (
     <li
+      data-tour="musicas-momento"
       className={cn(
         "flex flex-col gap-1 rounded-2xl bg-card p-3",
         chosen && "ring-1 ring-chart-2/60",
@@ -135,7 +136,7 @@ export default async function MusicPage() {
       <PageHeader title={m.music.title} />
       <div className="flex flex-col gap-8">
         <p className="text-body text-muted-foreground">{m.music.intro}</p>
-        <div className="flex flex-col gap-2">
+        <div data-tour="musicas-progresso" className="flex flex-col gap-2">
           <span className="text-subhead">
             {m.music.progress(done, ceremonyMoments.length)}
           </span>
@@ -157,6 +158,7 @@ export default async function MusicPage() {
         ).map(([key, label, moments]) => (
           <section
             key={key}
+            data-tour={`musicas-${key}`}
             aria-labelledby={`musicas-${key}`}
             className="flex flex-col gap-3"
           >

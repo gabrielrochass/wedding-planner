@@ -4,6 +4,7 @@ import { starterTasks } from "@/lib/checklist";
 import { addDays, todayInSaoPaulo } from "@/lib/dates";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { tourIds } from "@/lib/tour";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -33,6 +34,14 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword(devUser);
   if (error) throw error;
+
+  if (alias) {
+    const fresh = url.searchParams.get("tours") === "1";
+    await supabase
+      .from("profiles")
+      .update({ tours_seen: fresh ? [] : [...tourIds] })
+      .eq("id", data.user.id);
+  }
 
   if (url.searchParams.get("sem-casamento") !== "1") {
     const { count } = await supabase

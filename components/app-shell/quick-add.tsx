@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 const options: {
   href: Route;
+  editorOnly?: boolean;
   title: string;
   hint: string;
   icon: typeof PlusIcon;
@@ -37,6 +38,7 @@ const options: {
   },
   {
     href: "/orcamento/gastos/novo",
+    editorOnly: true,
     title: m.quick.payment,
     hint: m.quick.paymentHint,
     icon: ReceiptIcon,
@@ -55,18 +57,26 @@ const options: {
   },
   {
     href: "/fornecedores/novo",
+    editorOnly: true,
     title: m.quick.vendor,
     hint: m.quick.vendorHint,
     icon: StoreIcon,
   },
 ];
 
-export function QuickAdd({ variant }: { variant: "tab" | "side" }) {
+export function QuickAdd({
+  variant,
+  canEdit,
+}: {
+  variant: "tab" | "side";
+  canEdit: boolean;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
+        data-tour="adicionar"
         aria-label={variant === "tab" ? m.nav.add : undefined}
         className={cn(
           variant === "tab"
@@ -82,23 +92,25 @@ export function QuickAdd({ variant }: { variant: "tab" | "side" }) {
       </SheetTrigger>
       <SheetContent title={m.quick.title} description={m.quick.description}>
         <ul className="grid grid-cols-2 gap-3">
-          {options.map(({ href, title, hint, icon: Icon }) => (
-            <li key={href}>
-              <Link
-                href={href}
-                onClick={() => setOpen(false)}
-                className="flex h-full min-h-28 flex-col gap-2 rounded-2xl bg-background p-4 transition-colors hover:bg-blush"
-              >
-                <span className="flex size-10 items-center justify-center rounded-full bg-blush text-link">
-                  <Icon aria-hidden="true" className="size-5" />
-                </span>
-                <span className="text-body font-semibold">{title}</span>
-                <span className="text-footnote text-muted-foreground">
-                  {hint}
-                </span>
-              </Link>
-            </li>
-          ))}
+          {options
+            .filter((option) => canEdit || !option.editorOnly)
+            .map(({ href, title, hint, icon: Icon }) => (
+              <li key={href}>
+                <Link
+                  href={href}
+                  onClick={() => setOpen(false)}
+                  className="flex h-full min-h-28 flex-col gap-2 rounded-2xl bg-background p-4 transition-colors hover:bg-blush"
+                >
+                  <span className="flex size-10 items-center justify-center rounded-full bg-blush text-link">
+                    <Icon aria-hidden="true" className="size-5" />
+                  </span>
+                  <span className="text-body font-semibold">{title}</span>
+                  <span className="text-footnote text-muted-foreground">
+                    {hint}
+                  </span>
+                </Link>
+              </li>
+            ))}
         </ul>
       </SheetContent>
     </Sheet>

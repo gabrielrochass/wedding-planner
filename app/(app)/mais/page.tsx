@@ -21,6 +21,7 @@ export default function MorePage() {
     <>
       <PageHeader title={m.nav.more} back={{ href: "/", label: m.nav.home }} />
       <SettingsLinks
+        tour="mais-lista"
         links={[...secondaryNav, settingsNav].map((item, index) => ({
           href: item.href,
           title: item.label,

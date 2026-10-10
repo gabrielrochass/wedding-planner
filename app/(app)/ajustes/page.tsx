@@ -7,6 +7,7 @@ import {
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { SettingsLinks } from "@/components/settings/settings-links";
+import { TourReplay } from "@/components/settings/tour-replay";
 import { m } from "@/lib/i18n";
 
 export const metadata: Metadata = { title: m.nav.settings };
@@ -17,6 +18,7 @@ export default function SettingsPage() {
       <PageHeader title={m.nav.settings} />
       <div className="flex flex-col gap-6">
         <SettingsLinks
+          tour="ajustes-casamento"
           links={[
             {
               href: "/ajustes/casamento",
@@ -35,6 +37,7 @@ export default function SettingsPage() {
           ]}
         />
         <SettingsLinks
+          tour="ajustes-conta"
           links={[
             {
               href: "/ajustes/conta",
@@ -52,6 +55,7 @@ export default function SettingsPage() {
             },
           ]}
         />
+        <TourReplay />
       </div>
     </>
   );

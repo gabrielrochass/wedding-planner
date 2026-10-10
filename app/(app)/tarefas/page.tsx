@@ -71,7 +71,7 @@ export default async function TasksPage({
         }
       />
       <div className="flex flex-col gap-6">
-        <div className="flex flex-col gap-2">
+        <div data-tour="tarefas-progresso" className="flex flex-col gap-2">
           <div className="flex items-center justify-between text-subhead">
             <span className="text-muted-foreground">
               {m.tasks.progress(done, tasks.length)}
@@ -93,7 +93,11 @@ export default async function TasksPage({
           </div>
         </div>
 
-        <nav aria-label={m.tasks.filters} className="flex gap-2">
+        <nav
+          data-tour="tarefas-filtros"
+          aria-label={m.tasks.filters}
+          className="flex gap-2"
+        >
           {filters.map((key) => (
             <Link
               key={key}
@@ -121,6 +125,7 @@ export default async function TasksPage({
             <section
               key={phase}
               id={`fase-${phase}`}
+              data-tour="tarefas-fase"
               aria-labelledby={`titulo-${phase}`}
               className="flex scroll-mt-6 flex-col gap-2"
             >
@@ -145,6 +150,7 @@ export default async function TasksPage({
                   return (
                     <li
                       key={task.id}
+                      data-tour="tarefas-item"
                       className="flex items-center gap-1 pr-3 pl-1"
                     >
                       <TaskCheck

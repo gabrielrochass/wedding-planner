@@ -530,6 +530,7 @@ export type Database = {
           heard_from: string | null
           id: string
           planning_as: string | null
+          tours_seen: string[]
         }
         Insert: {
           created_at?: string
@@ -538,6 +539,7 @@ export type Database = {
           heard_from?: string | null
           id: string
           planning_as?: string | null
+          tours_seen?: string[]
         }
         Update: {
           created_at?: string
@@ -546,6 +548,7 @@ export type Database = {
           heard_from?: string | null
           id?: string
           planning_as?: string | null
+          tours_seen?: string[]
         }
         Relationships: [
           {

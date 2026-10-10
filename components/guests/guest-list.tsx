@@ -100,7 +100,7 @@ export function GuestList({
       <h2 id="lista" className="sr-only">
         {m.guests.title}
       </h2>
-      <div className="relative">
+      <div data-tour="convidados-busca" className="relative">
         <SearchIcon
           aria-hidden="true"
           className="pointer-events-none absolute top-1/2 left-3 size-5 -translate-y-1/2 text-muted-foreground"
@@ -114,7 +114,10 @@ export function GuestList({
           className="bg-card pl-10 dark:bg-card"
         />
       </div>
-      <fieldset className="flex min-w-0 gap-2 overflow-x-auto pb-1">
+      <fieldset
+        data-tour="convidados-filtros"
+        className="flex min-w-0 gap-2 overflow-x-auto pb-1"
+      >
         <legend className="sr-only">{m.guests.list}</legend>
         {filters.map(([key, label]) => (
           <button
@@ -145,6 +148,7 @@ export function GuestList({
             return (
               <li
                 key={household.id}
+                data-tour="convidados-familia"
                 className="flex items-center gap-3 px-4 py-3"
               >
                 <span

@@ -83,6 +83,7 @@ export default async function GuestsPage() {
           {pending > 0 && editable && (
             <Link
               href="/convidados/triagem"
+              data-tour="convidados-triagem"
               className="flex min-h-16 items-center gap-3 rounded-2xl bg-linear-to-r from-blush to-card px-4 py-3"
             >
               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
@@ -106,6 +107,7 @@ export default async function GuestsPage() {
           {editable && (
             <Link
               href="/convidados/colar"
+              data-tour="convidados-colar"
               className={cn(
                 buttonVariants({ variant: "secondary", size: "lg" }),
                 "w-fit",

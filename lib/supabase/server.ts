@@ -45,7 +45,7 @@ export const requireWedding = cache(async () => {
   const { supabase, userId } = user;
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("display_name, current_wedding_id")
+    .select("display_name, current_wedding_id, tours_seen")
     .eq("id", userId)
     .single();
   if (error) throw error;
@@ -72,6 +72,7 @@ export const requireWedding = cache(async () => {
   return {
     ...user,
     displayName: profile.display_name,
+    toursSeen: profile.tours_seen,
     wedding: wedding.data,
     role: member.data.role,
   };

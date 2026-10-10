@@ -12,9 +12,11 @@ import { NavLink } from "./nav-link";
 export function SideNav({
   couple,
   canAdd,
+  canEdit,
 }: {
   couple: string;
   canAdd: boolean;
+  canEdit: boolean;
 }) {
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-6 px-3 py-6 md:flex">
@@ -30,7 +32,7 @@ export function SideNav({
           {couple}
         </p>
       </div>
-      {canAdd && <QuickAdd variant="side" />}
+      {canAdd && <QuickAdd variant="side" canEdit={canEdit} />}
       <nav
         aria-label={m.nav.label}
         className="flex flex-1 flex-col justify-between"
@@ -41,7 +43,7 @@ export function SideNav({
               <SideNavItem key={item.href} item={item} />
             ))}
           </ul>
-          <ul className="flex flex-col gap-0.5">
+          <ul data-tour="mais" className="flex flex-col gap-0.5">
             {secondaryNav.map((item) => (
               <SideNavItem key={item.href} item={item} />
             ))}

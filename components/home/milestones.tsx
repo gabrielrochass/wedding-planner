@@ -31,7 +31,11 @@ export function Milestones({
 }) {
   const count = items.filter((item) => item.reached).length;
   return (
-    <section aria-labelledby="conquistas" className="flex flex-col gap-3">
+    <section
+      data-tour="inicio-conquistas"
+      aria-labelledby="conquistas"
+      className="flex flex-col gap-3"
+    >
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="conquistas" className="text-headline font-semibold">
           {m.home.milestones}

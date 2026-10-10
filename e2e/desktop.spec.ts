@@ -1,4 +1,4 @@
-import { test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 import { expectNoAxeViolations } from "./axe";
 
 const appPaths = [
@@ -36,3 +36,23 @@ for (const colorScheme of ["light", "dark"] as const) {
     }
   });
 }
+
+test("the general tour points at the side navigation", async ({ page }) => {
+  await page.goto("/dev/entrar?as=tour-desktop&tours=1&next=%2F");
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toHaveAccessibleName("Boas-vindas ao Dois em Um");
+  for (const title of [
+    "Início, o resumo de tudo",
+    "Tarefas, o checklist com prazos",
+    "Adicionar de qualquer lugar",
+    "Convidados, por família",
+    "Orçamento, com parcelas",
+    "O resto fica em Mais",
+  ]) {
+    await page.getByRole("button", { name: "Próximo" }).click();
+    await expect(dialog).toHaveAccessibleName(title);
+  }
+  await expectNoAxeViolations(page);
+  await page.keyboard.press("Escape");
+  await expect(dialog).toHaveCount(0);
+});

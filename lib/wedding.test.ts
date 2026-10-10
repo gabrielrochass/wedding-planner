@@ -41,7 +41,7 @@ describe("wedding", () => {
       total: 3,
       behind: 0,
       next: "6m",
-      nextIn: 114,
+      nextIn: 25,
     });
     expect(
       phaseStatus([task(300), task(100)], "2028-02-20", "2027-10-01")?.behind,

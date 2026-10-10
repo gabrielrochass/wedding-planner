@@ -65,6 +65,7 @@ export default async function VendorsPage() {
             </p>
             <Link
               href="/fornecedores/comparar"
+              data-tour="fornecedores-comparar"
               className={cn(
                 buttonVariants({ variant: "secondary", size: "lg" }),
               )}

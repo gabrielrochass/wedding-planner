@@ -42,15 +42,18 @@ function Card({
   more,
   children,
   className,
+  tour,
 }: {
   title: string;
   href: Route;
   more: string;
   children: React.ReactNode;
   className?: string;
+  tour: string;
 }) {
   return (
     <section
+      data-tour={tour}
       className={cn(
         "flex min-w-0 flex-col gap-3 rounded-2xl bg-card p-4",
         className,
@@ -130,7 +133,10 @@ export default async function HomePage() {
     <>
       <PageHeader title={m.home.title} />
       <div className="flex flex-col gap-8">
-        <section className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blush via-card to-card p-5 sm:p-7">
+        <section
+          data-tour="inicio-contagem"
+          className="relative overflow-hidden rounded-3xl bg-linear-to-br from-blush via-card to-card p-5 sm:p-7"
+        >
           <div className="flex items-start justify-between gap-4">
             <div className="flex min-w-0 flex-col gap-3">
               <p className="font-display text-title1 leading-tight font-bold tracking-tight text-balance sm:text-large-title">
@@ -179,11 +185,17 @@ export default async function HomePage() {
                 </p>
               )}
             </div>
-            <div className="hidden flex-col items-center gap-1 sm:flex">
+            <div
+              data-tour="inicio-progresso"
+              className="hidden flex-col items-center gap-1 sm:flex"
+            >
               <ProgressRing value={progress} label={m.home.progress} />
             </div>
           </div>
-          <div className="mt-4 flex items-center gap-3 sm:hidden">
+          <div
+            data-tour="inicio-progresso"
+            className="mt-4 flex items-center gap-3 sm:hidden"
+          >
             <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full origin-left animate-grow-x rounded-full bg-primary"
@@ -200,7 +212,12 @@ export default async function HomePage() {
         {phase && <PhaseCard status={phase} />}
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Card title={m.home.focus} href="/tarefas" more={m.home.focusMore}>
+          <Card
+            tour="inicio-foco"
+            title={m.home.focus}
+            href="/tarefas"
+            more={m.home.focusMore}
+          >
             {focus.length === 0 ? (
               <p className="text-subhead text-muted-foreground">
                 {m.home.focusEmpty}
@@ -236,6 +253,7 @@ export default async function HomePage() {
           </Card>
 
           <Card
+            tour="inicio-pagamentos"
             title={m.home.payments}
             href="/orcamento"
             more={m.home.paymentsMore}
@@ -274,6 +292,7 @@ export default async function HomePage() {
           </Card>
 
           <Card
+            tour="inicio-convidados"
             title={m.home.guestsCard}
             href="/convidados"
             more={m.home.guestsMore}
@@ -301,6 +320,7 @@ export default async function HomePage() {
           </Card>
 
           <Card
+            tour="inicio-orcamento"
             title={m.home.budgetCard}
             href="/orcamento"
             more={m.home.paymentsMore}
