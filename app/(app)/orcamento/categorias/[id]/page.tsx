@@ -1,16 +1,11 @@
-import {
-  ChevronRightIcon,
-  PencilIcon,
-  PlusIcon,
-  ReceiptIcon,
-} from "lucide-react";
+import { ChevronRightIcon, PlusIcon, ReceiptIcon } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { EmptyState } from "@/components/app-shell/empty-state";
 import { PageHeader } from "@/components/app-shell/page-header";
-import { buttonVariants } from "@/components/ui/button";
+import { CategorySheet } from "@/components/budget/category-sheet";
 import { expenseCost, isContracted, summarize } from "@/lib/budget";
 import { getBudget } from "@/lib/data";
 import { m } from "@/lib/i18n";
@@ -60,20 +55,7 @@ export default async function CategoryPage({
       <PageHeader
         title={category.name}
         back={{ href: "/orcamento", label: m.budget.title }}
-        action={
-          editable ? (
-            <Link
-              href={`/orcamento/categorias/${id}/editar` as Route}
-              aria-label={m.budget.editCategory}
-              className={buttonVariants({
-                size: "icon-lg",
-                variant: "secondary",
-              })}
-            >
-              <PencilIcon aria-hidden="true" className="size-5" />
-            </Link>
-          ) : undefined
-        }
+        action={editable ? <CategorySheet category={category} /> : undefined}
       />
       <div className="flex flex-col gap-6">
         <section className="flex items-center gap-4 rounded-3xl bg-card p-5">

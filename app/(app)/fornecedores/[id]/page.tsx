@@ -10,6 +10,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { PageHeader } from "@/components/app-shell/page-header";
+import { CollapsibleEditor } from "@/components/forms/collapsible-editor";
 import { buttonVariants } from "@/components/ui/button";
 import { HirePanel } from "@/components/vendors/hire-panel";
 import { VendorEditor } from "@/components/vendors/vendor-editor";
@@ -118,41 +119,38 @@ export default async function VendorPage({
           )
         )}
 
-        {editable ? (
-          <VendorEditor vendor={vendor} categories={budget.categories} />
-        ) : (
-          <dl className="grid gap-4 rounded-2xl bg-card p-5 sm:grid-cols-2">
-            {[
-              [m.vendors.status, m.vendorStatus[vendor.status]],
-              [
-                m.vendors.quote,
-                vendor.quote_cents ? formatWholeBRL(vendor.quote_cents) : null,
-              ],
-              [m.vendors.quoteDetails, vendor.quote_details],
-              [m.vendors.contactName, vendor.contact_name],
-              [m.vendors.phone, vendor.phone],
-              [
-                m.vendors.capacity,
-                vendor.capacity
-                  ? m.vendors.capacityValue(vendor.capacity)
-                  : null,
-              ],
-              [
-                m.vendors.rating,
-                vendor.rating ? m.vendors.ratingValue(vendor.rating) : null,
-              ],
-              [m.vendors.notes, vendor.notes],
-            ]
-              .filter(([, value]) => value)
-              .map(([label, value]) => (
-                <div key={label} className="flex flex-col gap-0.5">
-                  <dt className="text-footnote text-muted-foreground">
-                    {label}
-                  </dt>
-                  <dd className="text-body whitespace-pre-line">{value}</dd>
-                </div>
-              ))}
-          </dl>
+        <dl className="grid gap-4 rounded-2xl bg-card p-5 sm:grid-cols-2">
+          {[
+            [m.vendors.status, m.vendorStatus[vendor.status]],
+            [
+              m.vendors.quote,
+              vendor.quote_cents ? formatWholeBRL(vendor.quote_cents) : null,
+            ],
+            [m.vendors.quoteDetails, vendor.quote_details],
+            [m.vendors.contactName, vendor.contact_name],
+            [m.vendors.phone, vendor.phone],
+            [
+              m.vendors.capacity,
+              vendor.capacity ? m.vendors.capacityValue(vendor.capacity) : null,
+            ],
+            [
+              m.vendors.rating,
+              vendor.rating ? m.vendors.ratingValue(vendor.rating) : null,
+            ],
+            [m.vendors.notes, vendor.notes],
+          ]
+            .filter(([, value]) => value)
+            .map(([label, value]) => (
+              <div key={label} className="flex flex-col gap-0.5">
+                <dt className="text-footnote text-muted-foreground">{label}</dt>
+                <dd className="text-body whitespace-pre-line">{value}</dd>
+              </div>
+            ))}
+        </dl>
+        {editable && (
+          <CollapsibleEditor label={m.common.edit}>
+            <VendorEditor vendor={vendor} categories={budget.categories} />
+          </CollapsibleEditor>
         )}
       </div>
     </>

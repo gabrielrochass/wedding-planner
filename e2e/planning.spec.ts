@@ -10,16 +10,15 @@ function signIn(page: Page, alias: string, next: string, project: string) {
 test("tasks are created, completed and grouped by phase", async ({
   page,
 }, testInfo) => {
-  await signIn(page, "tarefas", "/tarefas/nova", testInfo.project.name);
-  await page.getByRole("button", { name: "Nova tarefa" }).click();
-  await expect(page.getByLabel("O que fazer")).toHaveAccessibleDescription(
-    "Escreva a tarefa",
-  );
+  await signIn(page, "tarefas", "/tarefas", testInfo.project.name);
+  await page.getByRole("button", { name: "Nova tarefa" }).first().click();
+  const sheet = page.getByRole("dialog", { name: "Nova tarefa" });
+  await expect(sheet).toBeVisible();
 
-  await page.getByLabel("O que fazer").fill("Provar os doces da Simone");
-  await page.getByLabel("Dias antes do casamento").fill("200");
-  await page.getByRole("button", { name: "Nova tarefa" }).click();
-  await expect(page).toHaveURL("/tarefas");
+  await sheet.getByLabel("O que fazer").fill("Provar os doces da Simone");
+  await sheet.getByLabel("Dias antes do casamento").fill("200");
+  await sheet.getByRole("button", { name: "Salvar" }).click();
+  await expect(sheet).not.toBeVisible();
 
   const task = page.getByRole("checkbox", {
     name: "Marcar como feita: Provar os doces da Simone",

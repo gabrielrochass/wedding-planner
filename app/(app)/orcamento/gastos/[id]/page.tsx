@@ -5,8 +5,11 @@ import { z } from "zod";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { ExpenseEditor } from "@/components/budget/expense-editor";
 import { PaymentList } from "@/components/budget/payments";
+import { CollapsibleEditor } from "@/components/forms/collapsible-editor";
+import { expenseCost, isContracted } from "@/lib/budget";
 import { getBudget, getVendors } from "@/lib/data";
 import { m } from "@/lib/i18n";
+import { formatWholeBRL } from "@/lib/money";
 import { canEdit } from "@/lib/roles";
 import { requireWedding } from "@/lib/supabase/server";
 
@@ -51,12 +54,31 @@ export default async function ExpensePage({
           payments={budget.payments.filter((p) => p.expense_id === id)}
           editable={editable}
         />
+        <dl className="grid gap-4 rounded-2xl bg-card p-5 sm:grid-cols-2">
+          {[
+            [m.budget.category, category?.name],
+            [
+              isContracted(expense) ? m.budget.contracted : m.budget.estimated,
+              formatWholeBRL(expenseCost(expense)),
+            ],
+            [m.tasks.notes, expense.notes],
+          ]
+            .filter(([, value]) => value)
+            .map(([label, value]) => (
+              <div key={label} className="flex flex-col gap-0.5">
+                <dt className="text-footnote text-muted-foreground">{label}</dt>
+                <dd className="text-body whitespace-pre-line">{value}</dd>
+              </div>
+            ))}
+        </dl>
         {editable && (
-          <ExpenseEditor
-            expense={expense}
-            categories={budget.categories}
-            categoryId={null}
-          />
+          <CollapsibleEditor label={m.common.edit}>
+            <ExpenseEditor
+              expense={expense}
+              categories={budget.categories}
+              categoryId={null}
+            />
+          </CollapsibleEditor>
         )}
       </div>
     </>

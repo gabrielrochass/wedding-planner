@@ -10,6 +10,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/app-shell/empty-state";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { BudgetDonut, sliceColor } from "@/components/budget/budget-donut";
+import { CategorySheet } from "@/components/budget/category-sheet";
 import { PaymentBadge } from "@/components/budget/payment-badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Money } from "@/components/ui/money";
@@ -255,15 +256,7 @@ export default async function BudgetPage() {
             <h2 id="categorias" className="text-headline font-semibold">
               {m.budget.categories}
             </h2>
-            {editable && (
-              <Link
-                href="/orcamento/categorias/nova"
-                className="flex min-h-11 items-center gap-1 text-subhead font-medium text-link"
-              >
-                <PlusIcon aria-hidden="true" className="size-4" />
-                {m.budget.newCategory}
-              </Link>
-            )}
+            {editable && <CategorySheet category={null} />}
           </div>
           {budget.categories.length === 0 ? (
             <EmptyState

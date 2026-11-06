@@ -10,6 +10,7 @@ import {
 import type { Route } from "next";
 import Link from "next/link";
 import { useDeferredValue, useState } from "react";
+import { RsvpQuickSheet } from "@/components/guests/rsvp-quick-sheet";
 import { Input } from "@/components/ui/input";
 import type { Guest, Household } from "@/lib/data";
 import { initials } from "@/lib/guests";
@@ -45,11 +46,13 @@ export function GuestList({
   guests,
   couple,
   dateLabel,
+  editable,
 }: {
   households: Household[];
   guests: Guest[];
   couple: string;
   dateLabel: string | null;
+  editable: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -186,6 +189,13 @@ export function GuestList({
                     })}
                   </span>
                 </Link>
+                {people.length > 0 && (
+                  <RsvpQuickSheet
+                    householdName={household.name}
+                    guests={people}
+                    disabled={!editable}
+                  />
+                )}
                 {link && (
                   <a
                     href={link}

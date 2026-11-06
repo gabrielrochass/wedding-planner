@@ -34,7 +34,7 @@ export default function manifest(): MetadataRoute.Manifest {
       },
     ],
     shortcuts: [
-      { name: m.tasks.newTask, url: "/tarefas/nova" },
+      { name: m.tasks.newTask, url: "/tarefas" },
       { name: m.guests.newHousehold, url: "/convidados/nova" },
     ],
   };

@@ -21,12 +21,10 @@ const screens = [
   "/cronograma",
   "/enxoval",
   "/enxoval/colar",
-  "/tarefas/nova",
   "/convidados/nova",
   "/convidados/colar",
   "/convidados/triagem",
   "/orcamento/gastos/novo",
-  "/orcamento/categorias/nova",
   "/ajustes",
   "/ajustes/casamento",
   "/ajustes/conta",
@@ -79,7 +77,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       await expectNoAxeViolations(page);
       await sheet.getByRole("link", { name: /Tarefa/ }).click();
       await expect(
-        page.getByRole("heading", { level: 1, name: "Nova tarefa" }),
+        page.getByRole("heading", { level: 1, name: "Tarefas" }),
       ).toBeVisible();
     });
 

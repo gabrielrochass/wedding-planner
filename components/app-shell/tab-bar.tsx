@@ -1,6 +1,6 @@
 import { QuickAdd } from "@/components/app-shell/quick-add";
 import { m } from "@/lib/i18n";
-import { type NavItem, primaryNav } from "./nav-items";
+import { moreNav, type NavItem, primaryNav } from "./nav-items";
 import { NavLink } from "./nav-link";
 
 export function TabBar({
@@ -10,7 +10,7 @@ export function TabBar({
   canAdd: boolean;
   canEdit: boolean;
 }) {
-  const [first, second, ...rest] = primaryNav;
+  const [home, tasks, , budget] = primaryNav;
 
   return (
     <nav
@@ -18,14 +18,13 @@ export function TabBar({
       className="fixed inset-x-0 bottom-0 z-40 border-t bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl md:hidden [@media(prefers-reduced-transparency:reduce)]:bg-card"
     >
       <ul className="mx-auto grid h-(--tabbar-h) max-w-md grid-cols-5 items-center">
-        <TabItem item={first} />
-        <TabItem item={second} />
+        <TabItem item={home} />
+        <TabItem item={tasks} />
         <li className="flex justify-center">
           {canAdd && <QuickAdd variant="tab" canEdit={canEdit} />}
         </li>
-        {rest.map((item) => (
-          <TabItem key={item.href} item={item} />
-        ))}
+        <TabItem item={budget} />
+        <TabItem item={moreNav} />
       </ul>
     </nav>
   );

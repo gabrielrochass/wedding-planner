@@ -1,13 +1,13 @@
-import { ListChecksIcon, PlusIcon } from "lucide-react";
+import { ListChecksIcon } from "lucide-react";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { EmptyState } from "@/components/app-shell/empty-state";
 import { PageHeader } from "@/components/app-shell/page-header";
 import { TaskBadge } from "@/components/tasks/task-badge";
 import { TaskCheck } from "@/components/tasks/task-check";
-import { buttonVariants } from "@/components/ui/button";
+import { TaskSheet } from "@/components/tasks/task-sheet";
 import { dueDate, groupByPhase, taskState } from "@/lib/checklist";
-import { getPeople, getTasks } from "@/lib/data";
+import { getPeople, getTasks, getVendors } from "@/lib/data";
 import { formatDate, todayInSaoPaulo } from "@/lib/dates";
 import { m } from "@/lib/i18n";
 import { canHelp } from "@/lib/roles";
@@ -31,11 +31,13 @@ export default async function TasksPage({
   const filter: Filter = filters.includes(raw as Filter)
     ? (raw as Filter)
     : "abertas";
-  const [{ wedding, role, userId }, tasks, people] = await Promise.all([
-    requireWedding(),
-    getTasks(),
-    getPeople(),
-  ]);
+  const [{ wedding, role, userId }, tasks, people, allVendors] =
+    await Promise.all([
+      requireWedding(),
+      getTasks(),
+      getPeople(),
+      getVendors(),
+    ]);
   const today = todayInSaoPaulo();
   const date = wedding.wedding_date;
   const names = new Map(
@@ -50,6 +52,8 @@ export default async function TasksPage({
   );
   const done = tasks.filter((task) => task.done_at).length;
   const editable = canHelp(role);
+  const vendors = allVendors.map(({ id, name }) => ({ id, name }));
+  const hasDate = wedding.wedding_date !== null;
 
   return (
     <>
@@ -57,16 +61,13 @@ export default async function TasksPage({
         title={m.tasks.title}
         action={
           editable ? (
-            <Link
-              href="/tarefas/nova"
-              aria-label={m.tasks.newTask}
-              className={buttonVariants({
-                size: "icon-lg",
-                variant: "secondary",
-              })}
-            >
-              <PlusIcon aria-hidden="true" className="size-6" />
-            </Link>
+            <TaskSheet
+              task={null}
+              people={people}
+              vendors={vendors}
+              hasDate={hasDate}
+              trigger="add"
+            />
           ) : undefined
         }
       />
@@ -151,7 +152,7 @@ export default async function TasksPage({
                     <li
                       key={task.id}
                       data-tour="tarefas-item"
-                      className="flex items-center gap-1 pr-3 pl-1"
+                      className="flex items-center gap-1 pr-1 pl-1"
                     >
                       <TaskCheck
                         id={task.id}
@@ -159,10 +160,7 @@ export default async function TasksPage({
                         done={!!task.done_at}
                         disabled={!editable}
                       />
-                      <Link
-                        href={`/tarefas/${task.id}` as Route}
-                        className="flex min-h-14 min-w-0 flex-1 flex-col justify-center gap-0.5 py-2"
-                      >
+                      <div className="flex min-h-14 min-w-0 flex-1 flex-col justify-center gap-0.5 py-2">
                         <span
                           className={cn(
                             "text-body",
@@ -197,7 +195,16 @@ export default async function TasksPage({
                             </span>
                           )}
                         </span>
-                      </Link>
+                      </div>
+                      {editable && (
+                        <TaskSheet
+                          task={task}
+                          people={people}
+                          vendors={vendors}
+                          hasDate={hasDate}
+                          trigger="edit"
+                        />
+                      )}
                     </li>
                   );
                 })}

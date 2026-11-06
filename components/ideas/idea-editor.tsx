@@ -83,7 +83,11 @@ export function IdeaEditor({
         title: idea ? m.ideas.saved : m.ideas.created,
         type: "success",
       });
-      router.replace(`/ideias?quadro=${where}`);
+      if (idea) {
+        router.refresh();
+      } else {
+        router.replace(`/ideias/${id}`);
+      }
     });
   }
 

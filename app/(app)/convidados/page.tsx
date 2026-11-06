@@ -125,6 +125,7 @@ export default async function GuestsPage() {
               wedding.wedding_date,
               wedding.date_is_estimate,
             )}
+            editable={editable}
           />
         </div>
       )}

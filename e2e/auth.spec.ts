@@ -387,7 +387,7 @@ test("installing works without a session", async ({ request }) => {
   const response = await request.get("/manifest.webmanifest");
   expect(response.ok()).toBe(true);
   const manifest = await response.json();
-  expect(manifest.shortcuts[0].url).toBe("/tarefas/nova");
+  expect(manifest.shortcuts[0].url).toBe("/tarefas");
   for (const icon of manifest.icons) {
     expect((await request.get(icon.src)).ok(), icon.src).toBe(true);
   }

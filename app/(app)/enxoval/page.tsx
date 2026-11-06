@@ -52,6 +52,7 @@ export default async function HomeItemsPage({
   const status = homeStatuses.includes(params.situacao as HomeStatus)
     ? (params.situacao as HomeStatus)
     : null;
+  const autoOpen = params.novo === "1";
   const [{ role }, items, { households }] = await Promise.all([
     requireWedding(),
     getHomeItems(),
@@ -81,6 +82,7 @@ export default async function HomeItemsPage({
               item={null}
               room={room}
               households={householdOptions}
+              defaultOpen={autoOpen}
             />
           ) : undefined
         }

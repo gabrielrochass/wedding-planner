@@ -20,6 +20,7 @@ export function SheetForm({
   onSaved,
   savedMessage,
   deletedMessage,
+  defaultOpen,
   children,
 }: {
   title: string;
@@ -30,9 +31,10 @@ export function SheetForm({
   onSaved?: () => void;
   savedMessage: string;
   deletedMessage?: string;
+  defaultOpen?: boolean;
   children: React.ReactNode;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen ?? false);
   const [status, setStatus] = useState("");
   const [saving, startSave] = useTransition();
   const [removing, startRemove] = useTransition();

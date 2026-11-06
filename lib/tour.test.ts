@@ -42,7 +42,6 @@ describe("tourToOpen", () => {
   it("then opens each page tour once", () => {
     expect(tourToOpen("/tarefas", ["geral"], null)).toBe("tarefas");
     expect(tourToOpen("/tarefas", ["geral", "tarefas"], null)).toBeNull();
-    expect(tourToOpen("/tarefas/nova", ["geral"], null)).toBeNull();
   });
 
   it("replays on request", () => {

@@ -25,7 +25,7 @@ const options: {
   icon: typeof PlusIcon;
 }[] = [
   {
-    href: "/tarefas/nova",
+    href: "/tarefas",
     title: m.quick.task,
     hint: m.quick.taskHint,
     icon: ListChecksIcon,
@@ -50,7 +50,7 @@ const options: {
     icon: LightbulbIcon,
   },
   {
-    href: "/enxoval",
+    href: "/enxoval?novo=1",
     title: m.quick.homeItem,
     hint: m.quick.homeItemHint,
     icon: SofaIcon,

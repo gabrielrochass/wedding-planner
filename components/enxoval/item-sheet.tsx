@@ -22,10 +22,12 @@ export function HomeItemSheet({
   item,
   room,
   households,
+  defaultOpen,
 }: {
   item: HomeItem | null;
   room: HomeRoom | null;
   households: { id: string; name: string }[];
+  defaultOpen?: boolean;
 }) {
   const [id, setId] = useState(() => item?.id ?? crypto.randomUUID());
   const [name, setName] = useState(item?.name ?? "");
@@ -51,6 +53,7 @@ export function HomeItemSheet({
       triggerLabel={item ? `${m.common.edit}: ${item.name}` : m.enxoval.newItem}
       savedMessage={m.enxoval.saved}
       deletedMessage={m.enxoval.deleted}
+      defaultOpen={defaultOpen}
       onSave={() =>
         saveHomeItem(
           {

@@ -1147,6 +1147,7 @@ export const m = {
     dietary: "Restrição alimentar",
     rsvp: "Presença",
     rsvpSaved: (name: string, answer: string) => `${name}: ${answer}`,
+    rsvpOf: (household: string) => `Presença: ${household}`,
     created: "Família adicionada",
     saved: "Família salva",
     deleted: "Família excluída",
