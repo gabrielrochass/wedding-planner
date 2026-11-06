@@ -1,6 +1,6 @@
 "use client";
 
-import { HandshakeIcon } from "lucide-react";
+import { HandshakeIcon, Loader2Icon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Field } from "@/components/forms/field";
@@ -150,7 +150,11 @@ export function HirePanel({
         disabled={pending || categories.length === 0}
         focusableWhenDisabled
       >
-        <HandshakeIcon aria-hidden="true" />
+        {pending ? (
+          <Loader2Icon aria-hidden="true" className="size-4 animate-spin" />
+        ) : (
+          <HandshakeIcon aria-hidden="true" />
+        )}
         {pending ? m.common.saving : m.vendors.hire}
       </Button>
     </section>

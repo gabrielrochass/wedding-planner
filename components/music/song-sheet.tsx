@@ -124,7 +124,7 @@ export function ChooseSong({
   disabled: boolean;
 }) {
   const [chosen, setChosen] = useOptimistic(song.chosen);
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
 
   return (
     <button
@@ -133,7 +133,7 @@ export function ChooseSong({
       aria-label={
         chosen ? m.music.unchoose(song.title) : m.music.choose(song.title)
       }
-      disabled={disabled}
+      disabled={disabled || pending}
       onClick={() =>
         startTransition(async () => {
           setChosen(!chosen);

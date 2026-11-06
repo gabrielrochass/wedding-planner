@@ -48,7 +48,7 @@ export function HomeStatusSelect({
   disabled: boolean;
 }) {
   const [current, setCurrent] = useOptimistic(status);
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
   const { icon: Icon, className, iconClass } = statusLook[current];
 
   return (
@@ -62,7 +62,7 @@ export function HomeStatusSelect({
       <select
         aria-label={m.enxoval.markAs(name)}
         value={current}
-        disabled={disabled}
+        disabled={disabled || pending}
         onChange={(event) => {
           const next = event.target.value as HomeStatus;
           startTransition(async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
+import { ChevronDownIcon, ChevronUpIcon, Loader2Icon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { ChoiceChips } from "@/components/forms/choice-chips";
 import { Field } from "@/components/forms/field";
@@ -215,7 +215,11 @@ export function MoveButtons({
         focusableWhenDisabled
         onClick={() => go(-1)}
       >
-        <ChevronUpIcon aria-hidden="true" />
+        {pending ? (
+          <Loader2Icon aria-hidden="true" className="animate-spin" />
+        ) : (
+          <ChevronUpIcon aria-hidden="true" />
+        )}
       </Button>
       <Button
         type="button"
@@ -226,7 +230,11 @@ export function MoveButtons({
         focusableWhenDisabled
         onClick={() => go(1)}
       >
-        <ChevronDownIcon aria-hidden="true" />
+        {pending ? (
+          <Loader2Icon aria-hidden="true" className="animate-spin" />
+        ) : (
+          <ChevronDownIcon aria-hidden="true" />
+        )}
       </Button>
     </div>
   );

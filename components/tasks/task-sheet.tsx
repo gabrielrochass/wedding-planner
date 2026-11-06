@@ -1,6 +1,8 @@
 "use client";
 
-import { PencilIcon, PlusIcon } from "lucide-react";
+import { ArrowRightIcon, PencilIcon, PlusIcon } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { ChoiceChips } from "@/components/forms/choice-chips";
 import { Field } from "@/components/forms/field";
@@ -12,7 +14,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "@/components/ui/toast";
 import { deleteTask, saveTask } from "@/lib/actions/tasks";
 import { attempt, failed } from "@/lib/attempt";
-import { type TaskArea, taskAreas } from "@/lib/checklist";
+import { areaHref, type TaskArea, taskAreas } from "@/lib/checklist";
 import type { Person, Task } from "@/lib/data";
 import { m } from "@/lib/i18n";
 import type { TaskInput } from "@/lib/schemas";
@@ -151,6 +153,16 @@ export function TaskSheet({
           <p className="rounded-2xl bg-blush px-4 py-3 text-subhead text-foreground">
             {task.notes}
           </p>
+        )}
+        {task && areaHref[task.area as TaskArea] && (
+          <Link
+            href={areaHref[task.area as TaskArea] as Route}
+            onClick={() => setOpen(false)}
+            className="flex min-h-11 items-center gap-2 text-subhead font-medium text-link"
+          >
+            {m.areas[task.area as keyof typeof m.areas]}
+            <ArrowRightIcon aria-hidden="true" className="size-4" />
+          </Link>
         )}
         <form
           noValidate

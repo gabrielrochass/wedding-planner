@@ -1,4 +1,4 @@
-import { Trash2Icon } from "lucide-react";
+import { Loader2Icon, Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { m } from "@/lib/i18n";
 
@@ -35,6 +35,9 @@ export function FormActions({
           </Button>
         )}
         <Button type="submit" size="lg" disabled={busy} focusableWhenDisabled>
+          {saving && (
+            <Loader2Icon aria-hidden="true" className="size-4 animate-spin" />
+          )}
           {saving ? m.common.saving : submitLabel}
         </Button>
       </div>
